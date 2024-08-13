@@ -6,20 +6,50 @@
 
     <groupId>com.ytx.ai</groupId>
     <artifactId>ytx-agi-framework</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <version>${rivision}</version>
+    <modules>
+        <module>ytx-agi-framework-core</module>
+        <module>ytx-agi-framework-dao</module>
+        <module>ytx-agi-framework-llm</module>
+    </modules>
 
     <properties>
+        <rivision>1.0-SNAPSHOT</rivision>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <spring.cloud.version>2021.0.7</spring.cloud.version>
+        <spring.boot.version>2.7.11</spring.boot.version>
     </properties>
 
 
     <dependencies>
+
         <dependency>
-            <groupId>com.unfbx</groupId>
-            <artifactId>chatgpt-java</artifactId>
-            <version>1.1.5</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>
