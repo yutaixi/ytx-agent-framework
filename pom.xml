@@ -12,6 +12,7 @@
         <module>ytx-agi-framework-core</module>
         <module>ytx-agi-framework-dao</module>
         <module>ytx-agi-framework-llm</module>
+        <module>ytx-agi-framework-base</module>
     </modules>
 
     <properties>

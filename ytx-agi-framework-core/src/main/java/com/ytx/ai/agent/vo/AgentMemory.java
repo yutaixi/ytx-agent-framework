@@ -3,13 +3,16 @@ package com.ytx.ai.agent.vo;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.ytx.ai.agent.util.StringUtils;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+@Getter
+@Setter
 public class AgentMemory implements Serializable {
 
 

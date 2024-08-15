@@ -1,4 +1,4 @@
-package com.ytx.ai.agent.vo;
+package com.ytx.ai.agent.constant;
 
 public class CommandEnum {
 
