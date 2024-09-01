@@ -1,0 +1,8 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.ytx.ai.agent.config.AgentConfig,\
+  com.ytx.ai.agent.config.AgentProperty,\
+  com.ytx.ai.agent.config.IntentAgentProperty,\
+  com.ytx.ai.agent.config.PlanAgentProperty,\
+ com.ytx.ai.agent.config.CrisisIdentityProperty,\
+ com.ytx.ai.agent.config.TaskExecutorProperty,\
+ com.ytx.ai.agent.config.InterceptorConfig

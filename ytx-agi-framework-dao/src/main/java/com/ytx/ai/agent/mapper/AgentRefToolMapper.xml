@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ytx.ai.agent.mapper.AgentRefToolMapper">
+
+
+    <select id="findAgentRefSkills" resultType="com.ytx.ai.agent.entity.AgentRefSkillEntity">
+        SELECT ref.*,s.name
+        FROM ai_agent_ref_tool ref
+        LEFT JOIN ai_skill s ON ref.tool_id=s.id
+        WHERE ref.agent_id=#{agentId}
+    </select>
+</mapper>

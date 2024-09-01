@@ -16,7 +16,7 @@ import com.ytx.ai.agent.execute.concurrent.AgentWorkerParam;
 import com.ytx.ai.agent.service.AgentMemoryService;
 import com.ytx.ai.agent.skill.AiAgent;
 import com.ytx.ai.agent.skill.ReplyToUserAgent;
-import com.ytx.ai.agent.tool.TaskTools;
+import com.ytx.ai.agent.util.TaskUtils;
 import com.ytx.ai.agent.util.StringUtils;
 import com.ytx.ai.agent.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -47,12 +47,36 @@ public class AgentTaskExecutor {
     private static final ExecutorService ttlExecutorService= TtlExecutors.getTtlExecutorService(COMMON_POOL);
 
     public AgentResponse run(ChatDTO chatDTO, PlannedTasks plannedTasks){
-        List<Map.Entry<Integer, List<AgentTask>>> reorderedTasks= TaskTools.reorderTasks(plannedTasks.getTasks());
+        return this.run(chatDTO,plannedTasks,null,false,null);
+    }
+    public AgentResponse run(ChatDTO chatDTO, PlannedTasks plannedTasks,Long timeout){
+        return this.run(chatDTO,plannedTasks,null,false,timeout);
+    }
+
+    public AgentResponse runAsync(ChatDTO chatDTO, PlannedTasks plannedTasks){
+        return this.run(chatDTO,plannedTasks,null,true,null);
+    }
+    public AgentResponse runAsync(ChatDTO chatDTO, PlannedTasks plannedTasks,Long timeout){
+        return this.run(chatDTO,plannedTasks,null,true,timeout);
+    }
+
+    public AgentResponse runAsync(ChatDTO chatDTO, PlannedTasks plannedTasks,AgentExecuteContext agentExecuteContext){
+        return this.run(chatDTO,plannedTasks,agentExecuteContext,true,null);
+    }
+    public AgentResponse runAsync(ChatDTO chatDTO, PlannedTasks plannedTasks,AgentExecuteContext agentExecuteContext,Long timeout){
+        return this.run(chatDTO,plannedTasks,agentExecuteContext,true,timeout);
+    }
+
+    public AgentResponse run(ChatDTO chatDTO, PlannedTasks plannedTasks,AgentExecuteContext agentExecuteContext,boolean async,Long timeout){
+        List<Map.Entry<Integer, List<AgentTask>>> reorderedTasks= TaskUtils.reorderTasks(plannedTasks.getTasks());
         String finalReply=null;
-        AgentExecuteContext agentExecuteContext=new AgentExecuteContext();
-        agentExecuteContext.setMemory(getMemory(chatDTO));
+        AgentExecuteContext context=agentExecuteContext;
+        if(ObjectUtil.isNull(context)){
+            context=getNewContext(chatDTO);
+        }
         boolean isNeedHumanFeedBack=false;
 
+        long taskTimeout= ObjectUtil.isNull(timeout)?taskExecutorProperty.getAsyncWorkerTimeout():timeout;
         for(Map.Entry<Integer,List<AgentTask>> entry :reorderedTasks){
             List<AgentTask> parallelTasks=entry.getValue();
             List<WorkerWrapper> workers=new ArrayList<>();
@@ -67,7 +91,7 @@ public class AgentTaskExecutor {
                 AgentWorkerParam workerParam=AgentWorkerParam.builder().agent(agent)
                         .targetTask(targetTask)
                         .chatDTO(chatDTO)
-                        .agentExecuteContext(agentExecuteContext)
+                        .agentExecuteContext(context)
                         .build();
                 AgentWorker worker=new AgentWorker();
                 WorkerWrapper<AgentWorkerParam,SubAgentResponse> workerWrapper=new WorkerWrapper.Builder<AgentWorkerParam,SubAgentResponse>()
@@ -81,8 +105,13 @@ public class AgentTaskExecutor {
             try{
                 StopWatch stopWatch=new StopWatch();
                 stopWatch.start();
-                Async.beginWork(taskExecutorProperty.getAsyncWorkerTimeout(),ttlExecutorService,workers);
-                afterEachGroupExecuted(callback,agentExecuteContext);
+
+                if(async){
+                    Async.beginWorkAsync(taskTimeout,COMMON_POOL,null,workers.toArray(new WorkerWrapper[0]));
+                }else{
+                    Async.beginWork(taskTimeout,ttlExecutorService,workers);
+                }
+                afterEachGroupExecuted(callback,context);
                 stopWatch.stop();
                 log.info(AgentConstants.CHAT_TRACE_LOG_MARKER+":{},\ntask group {} time cost:{}ms",
                         chatDTO.getChatId(),
@@ -95,21 +124,21 @@ public class AgentTaskExecutor {
             if(callback.isNeedHumanFeedback())
             {
                 AgentTask task=formatReplyAgentTask(plannedTasks,null);
-                SubAgentResponse result=skillRegister.getAgent(ReplyToUserAgent.NAME).execute(chatDTO,task,agentExecuteContext);
+                SubAgentResponse result=skillRegister.getAgent(ReplyToUserAgent.NAME).execute(chatDTO,task,context);
                 finalReply=String.valueOf(result.getResult());
                 isNeedHumanFeedBack=true;
                 break;
             }
         }
         if(!isNeedHumanFeedBack){
-            SubAgentResponse replyAgentResponse=agentExecuteContext.get(ReplyToUserAgent.NAME);
+            SubAgentResponse replyAgentResponse=context.get(ReplyToUserAgent.NAME);
             finalReply=String.valueOf(replyAgentResponse.getResult()) ;
         }
         AgentResponse agentResponse=AgentResponse.builder()
                 .result(finalReply)
-                .commands(agentExecuteContext.getCommands())
+                .commands(context.getCommands())
                 .build();
-        afterAllTaskExecuted(chatDTO,agentExecuteContext);
+        afterAllTaskExecuted(chatDTO,context,agentExecuteContext);
         return agentResponse;
 
     }
@@ -124,10 +153,13 @@ public class AgentTaskExecutor {
         }
     }
 
-    private void afterAllTaskExecuted(ChatDTO chatDTO,AgentExecuteContext context){
+    private void afterAllTaskExecuted(ChatDTO chatDTO,AgentExecuteContext context,AgentExecuteContext agentExecuteContext){
 
-        AgentMemory agentMemory=context.getMemory();
-        agentMemoryService.saveMemory(chatDTO.getChatId(),agentMemory);
+        if(ObjectUtil.isNull(agentExecuteContext)){
+            AgentMemory agentMemory=context.getMemory();
+            agentMemoryService.saveMemory(chatDTO.getChatId(),agentMemory);
+        }
+
     }
 
     private AgentMemory getMemory(ChatDTO chatDTO)
@@ -173,4 +205,12 @@ public class AgentTaskExecutor {
         }
         return replyAgentTask;
     }
+
+    private AgentExecuteContext getNewContext(ChatDTO chatDTO)
+    {
+        AgentExecuteContext agentExecuteContext=new AgentExecuteContext();
+        agentExecuteContext.setMemory(getMemory(chatDTO));
+        return agentExecuteContext;
+    }
+
 }

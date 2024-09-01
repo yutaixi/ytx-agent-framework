@@ -13,4 +13,5 @@ public class UserIntention {
     String reply;
     String isClear;
     String reason;
+
 }

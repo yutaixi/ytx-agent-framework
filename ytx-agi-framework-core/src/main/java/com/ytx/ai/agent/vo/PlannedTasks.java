@@ -12,7 +12,7 @@ public class PlannedTasks {
 
     List<AgentTask> tasks;
 
-    public String gatTaskName()
+    public String getTaskNames()
     {
         if(ObjectUtil.isEmpty(tasks)){
             return "";

@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.ytx.ai.agent.config.AgentDaoConfig,\
+  com.ytx.ai.agent.config.ContextAware,\
+  com.ytx.ai.agent.config.LocalCacheConfig

@@ -1,4 +1,4 @@
-package com.ytx.ai.agent.tool;
+package com.ytx.ai.agent.util;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class TaskTools {
+public class TaskUtils {
 
     public static List<Map.Entry<Integer, List<AgentTask>>> reorderTasks(List<AgentTask> tasks){
         Map<Integer,List<AgentTask>> taskMap=new HashMap<>();
