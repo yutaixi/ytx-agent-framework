@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.ytx.ai.agent.base.config.RedisConfig,\
+com.ytx.ai.agent.base.config.RedissonCacheConfig,\
+com.ytx.ai.agent.base.config.RedissonCacheConfig.RedissonConfig

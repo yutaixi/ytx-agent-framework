@@ -5,4 +5,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.ytx.ai.agent.config.PlanAgentProperty,\
  com.ytx.ai.agent.config.CrisisIdentityProperty,\
  com.ytx.ai.agent.config.TaskExecutorProperty,\
- com.ytx.ai.agent.config.InterceptorConfig
+ com.ytx.ai.agent.config.InterceptorConfig,\
+com.ytx.ai.agent.config.LlmConfig

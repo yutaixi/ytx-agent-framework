@@ -1,4 +1,4 @@
-package com.ytx.ai.llm.config;
+package com.ytx.ai.agent.config;
 
 import com.plexpt.chatgpt.ChatGPT;
 import com.ytx.ai.llm.service.LlmService;

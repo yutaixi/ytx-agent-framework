@@ -72,13 +72,13 @@ public class RedissonCacheConfig {
         }
 
         private void baseConfig(BaseConfig config, RedisProperties properties) {
-            if (!StringUtils.hasText(properties.getPassword())) {
+            if (StringUtils.hasText(properties.getPassword())) {
                 config.setPassword(properties.getPassword());
             }
             if (properties.getTimeout() != null) {
                 config.setTimeout(Long.valueOf(properties.getTimeout().getSeconds() * 1000).intValue());
             }
-            if (!StringUtils.hasText(properties.getClientName())) {
+            if (StringUtils.hasText(properties.getClientName())) {
                 config.setClientName(properties.getClientName());
             }
         }
