@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ytx.ai</groupId>
-    <artifactId>ytx-agi-framework</artifactId>
+    <artifactId>ytx-agent-framework</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>ytx-agi-framework-core</module>
-        <module>ytx-agi-framework-dao</module>
-        <module>ytx-agi-framework-llm</module>
-        <module>ytx-agi-framework-base</module>
+        <module>ytx-agent-framework-core</module>
+        <module>ytx-agent-framework-dao</module>
+        <module>ytx-agent-framework-llm</module>
+        <module>ytx-agent-framework-base</module>
     </modules>
 
     <properties>

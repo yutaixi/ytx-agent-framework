@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ytx.ai.agent.mapper.IntentionMapper">
-
-    <select id="queryAll" resultType="com.ytx.ai.agent.entity.IntentEntity">
-        SELECT *
-        FROM ai_intention
-    </select>
-</mapper>
