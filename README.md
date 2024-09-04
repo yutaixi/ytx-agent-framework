@@ -5,4 +5,4 @@
 [![pAVNqu6.jpg](https://s21.ax1x.com/2024/09/02/pAVNqu6.jpg)](https://imgse.com/i/pAVNqu6)
 
 # 使用该AI Agent框架开发的应用
-[ytx-agi](https://github.com/yutaixi/ytx-agi)
+[ytx-agi](https://github.com/yutaixi/ytx-agent)
