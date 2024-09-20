@@ -9,6 +9,7 @@ import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.util.Assert;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Jackson2JsonRedisSerializer序列化策略
@@ -37,6 +38,7 @@ public class JSON2JsonRedisSerializer<T> implements RedisSerializer<T> {
         return JSONUtil.toJsonStr(t).getBytes(DEFAULT_CHARSET);
     }
 
+    @lombok.SneakyThrows
     @Override
     public T deserialize(byte[] bytes) throws SerializationException
     {
@@ -44,6 +46,7 @@ public class JSON2JsonRedisSerializer<T> implements RedisSerializer<T> {
         {
             return null;
         }
+
         String str = new String(bytes, DEFAULT_CHARSET);
 
         return JSONUtil.toBean(str,clazz);

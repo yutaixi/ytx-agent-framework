@@ -11,6 +11,6 @@ public class AgentEntity {
 
     private Integer id;
     private String name;
-    String description;
-    int version;
+    private String description;
+    private int version;
 }

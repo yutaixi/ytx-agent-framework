@@ -5,6 +5,7 @@ import com.plexpt.chatgpt.ChatGPT;
 import com.plexpt.chatgpt.entity.chat.ChatCompletion;
 import com.plexpt.chatgpt.entity.chat.ChatCompletionResponse;
 import com.plexpt.chatgpt.entity.chat.Message;
+import com.plexpt.chatgpt.entity.chat.ResponseFormat;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -32,6 +33,7 @@ public class TestChatGpt {
                 .messages(Arrays.asList(system, message))
                 .maxTokens(3000)
                 .temperature(0.7)
+                .responseFormat(ResponseFormat.builder().type("json_object").build())
                 .build();
         ChatCompletionResponse response = chatGPT.chatCompletion(chatCompletion);
         Message res = response.getChoices().get(0).getMessage();

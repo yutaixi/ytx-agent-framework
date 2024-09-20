@@ -26,13 +26,14 @@ public class RedisConfig  extends CachingConfigurerSupport {
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         serializer.setObjectMapper(mapper);
 
-        template.setValueSerializer(serializer);
+
         // 使用StringRedisSerializer序列化和反序列化redis的key值
         template.setKeySerializer(new StringRedisSerializer());
         // 使用StringRedisSerializer序列化和反序列化redis hash类型的key值
         template.setHashKeySerializer(new StringRedisSerializer());
         // 序列化和反序列化redis hash类型的value值
         template.setHashValueSerializer(serializer);
+        template.setValueSerializer(serializer);
         template.afterPropertiesSet();
         return template;
     }

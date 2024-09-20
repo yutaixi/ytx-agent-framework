@@ -12,11 +12,11 @@ import java.util.List;
 @Setter
 @Builder
 public class SubAgentResponse {
-    String agentName;
-    boolean needHumanFeedback;
-    Object result;
-    List<Command> commands;
-    List<MemoryTrace> memoryTraces;
+    private String agentName;
+    private boolean needHumanFeedback;
+    private Object result;
+    private List<Command> commands;
+    private List<MemoryTrace> memoryTraces;
 
     public <T> T getBean(Class<T> clazz){
         if(ObjectUtil.isNull(result) || needHumanFeedback){

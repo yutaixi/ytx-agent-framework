@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AgentMemory implements Serializable {
 
 
-    Map<String,MemoryTrace> memoryMap=new ConcurrentHashMap<>();
+    private Map<String,MemoryTrace> memoryMap=new ConcurrentHashMap<>();
 
     public String toString()
     {

@@ -13,12 +13,12 @@ import java.util.Map;
 @Setter
 public class AgentInfo {
 
-    Integer id;
-    String name;
-    String code;
-    int version;
-    List<AgentRefIntentEntity> refIntentions;
-    List<AgentRefSkillEntity> refSkills;
-    Map<String,String> agentProperties;
+    private Integer id;
+    private String name;
+    private String code;
+    private  int version;
+    private  List<AgentRefIntentEntity> refIntentions;
+    private List<AgentRefSkillEntity> refSkills;
+    private  Map<String,String> agentProperties;
 
 }

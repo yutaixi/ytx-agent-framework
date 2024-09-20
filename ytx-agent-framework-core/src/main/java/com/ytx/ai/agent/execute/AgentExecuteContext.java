@@ -16,6 +16,7 @@ public class AgentExecuteContext {
         this.startTime=System.currentTimeMillis();
     }
 
+    private boolean runAgent;
     private Long startTime;
     private AgentMemory agentMemory;
     final List<Command> commands=new CopyOnWriteArrayList<>();
@@ -56,5 +57,15 @@ public class AgentExecuteContext {
     }
     public Long getStartTime(){
         return startTime;
+    }
+
+
+    public boolean isRunAgent() {
+        return runAgent;
+    }
+
+    public AgentExecuteContext setRunAgent(boolean runAgent) {
+        this.runAgent = runAgent;
+        return this;
     }
 }

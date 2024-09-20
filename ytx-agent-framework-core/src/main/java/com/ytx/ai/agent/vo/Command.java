@@ -9,7 +9,7 @@ import lombok.Setter;
 @Builder
 public class Command {
 
-    String name;
-    String objective;
-    String value;
+    private String name;
+    private String objective;
+    private String value;
 }

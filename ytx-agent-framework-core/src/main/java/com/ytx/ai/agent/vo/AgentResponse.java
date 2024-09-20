@@ -10,6 +10,6 @@ import java.util.List;
 @Setter
 @Builder
 public class AgentResponse {
-    String result;
-    List<Command> commands;
+    private String result;
+    private List<Command> commands;
 }

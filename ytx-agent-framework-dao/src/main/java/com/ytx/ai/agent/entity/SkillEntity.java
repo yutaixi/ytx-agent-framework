@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class SkillEntity {
 
-    String name;
-    String description;
+    private String name;
+    private String description;
 }

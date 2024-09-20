@@ -1,6 +1,7 @@
 package com.ytx.ai.agent.service;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.ytx.ai.agent.IntentionRegister;
 import com.ytx.ai.agent.entity.*;
@@ -84,7 +85,6 @@ public class AgentService {
         BeanUtils.copyProperties(agent,agentInfo);
         agentInfo.setId(agent.getId());
         agentInfo.setRefIntentions(refIntents);
-        agentInfo.setRefIntentions(refIntents);
         agentInfo.setRefSkills(refSkills);
 
         Map<String,String> properties=new HashMap<>();
@@ -101,18 +101,22 @@ public class AgentService {
     private void updateCache(String agentCode,AgentInfo agentInfo){
         caffeineCache.put(String.format(LOCAL_CACHE_AGENT_INFO_KEY,agentCode),agentInfo);
         try{
-            cacheService.setCacheObject(String.format(REDIS_AGENT_VER_KEY,agentCode),agentInfo.getVersion());
+            cacheService.setCacheObject(String.format(REDIS_AGENT_VER_KEY,agentCode),agentInfo );
         }catch (Exception e){
             log.error("update cache agent info error",e);
         }
     }
 
     public int getAgentVerion(String agentCode){
-        Integer ver;
+        Integer ver=null;
         try{
-            ver=cacheService.getCacheObject(String.format(REDIS_AGENT_VER_KEY,agentCode));
-            if(ObjectUtil.isNull(ver)){
-                ver=agentMapper.getVersion(agentCode);
+            Object cacheObj=cacheService.getCacheObject(String.format(REDIS_AGENT_VER_KEY,agentCode));
+            if(ObjectUtil.isNull(cacheObj)){
+                AgentEntity agentEntity=agentMapper.findAgent(agentCode);
+                ver=agentEntity.getVersion();
+            }else{
+                AgentInfo agentInfo= JSONUtil.toBean(JSONUtil.toJsonStr(cacheObj),AgentInfo.class);
+                ver=agentInfo.getVersion();
             }
         }catch (Exception e){
             ver=-100;

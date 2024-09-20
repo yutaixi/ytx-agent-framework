@@ -8,10 +8,10 @@ import lombok.Setter;
 @Setter
 @Builder
 public class UserIntention {
-    String intent;
-    String tag;
-    String reply;
-    String isClear;
-    String reason;
+    private String intent;
+    private String tag;
+    private String reply;
+    private String isClear;
+    private String reason;
 
 }

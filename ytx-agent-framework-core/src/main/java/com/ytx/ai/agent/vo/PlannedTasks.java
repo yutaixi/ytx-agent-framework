@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 public class PlannedTasks {
 
-    List<AgentTask> tasks;
+    private List<AgentTask> tasks;
 
     public String getTaskNames()
     {

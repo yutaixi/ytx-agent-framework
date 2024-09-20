@@ -10,10 +10,10 @@ import lombok.Setter;
 @Builder
 public class MemoryTrace {
 
-    String name;
-    String value;
-    MemorySaveOption saveOption;
-    boolean userAssigned;
+    private String name;
+    private String value;
+    private MemorySaveOption saveOption;
+    private boolean userAssigned;
     private boolean hasSaved;
 
 }

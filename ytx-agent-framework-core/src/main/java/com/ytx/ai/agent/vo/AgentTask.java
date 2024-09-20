@@ -6,11 +6,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AgentTask {
-    String task_id;
-    String agent;
-    String objective;
-    String context;
-    Integer execute_order;
-    Object execute_result;
-    Object params;
+    private String task_id;
+    private String agent;
+    private String objective;
+    private String context;
+    private Integer execute_order;
+    private Object execute_result;
+    private Object params;
 }

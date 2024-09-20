@@ -72,7 +72,7 @@ public class AgentTaskExecutor {
         String finalReply=null;
         AgentExecuteContext context=agentExecuteContext;
         if(ObjectUtil.isNull(context)){
-            context=getNewContext(chatDTO);
+            context= getNewAgentContext(chatDTO);
         }
         boolean isNeedHumanFeedBack=false;
 
@@ -123,14 +123,16 @@ public class AgentTaskExecutor {
             }
             if(callback.isNeedHumanFeedback())
             {
-                AgentTask task=formatReplyAgentTask(plannedTasks,null);
-                SubAgentResponse result=skillRegister.getAgent(ReplyToUserAgent.NAME).execute(chatDTO,task,context);
-                finalReply=String.valueOf(result.getResult());
+                if(context.isRunAgent()){
+                    AgentTask task=formatReplyAgentTask(plannedTasks,null);
+                    SubAgentResponse result=skillRegister.getAgent(ReplyToUserAgent.NAME).execute(chatDTO,task,context);
+                    finalReply=String.valueOf(result.getResult());
+                }
                 isNeedHumanFeedBack=true;
                 break;
             }
         }
-        if(!isNeedHumanFeedBack){
+        if(!isNeedHumanFeedBack && context.isRunAgent()){
             SubAgentResponse replyAgentResponse=context.get(ReplyToUserAgent.NAME);
             finalReply=String.valueOf(replyAgentResponse.getResult()) ;
         }
@@ -138,7 +140,7 @@ public class AgentTaskExecutor {
                 .result(finalReply)
                 .commands(context.getCommands())
                 .build();
-        afterAllTaskExecuted(chatDTO,context,agentExecuteContext);
+        afterAllTaskExecuted(chatDTO,context);
         return agentResponse;
 
     }
@@ -153,9 +155,9 @@ public class AgentTaskExecutor {
         }
     }
 
-    private void afterAllTaskExecuted(ChatDTO chatDTO,AgentExecuteContext context,AgentExecuteContext agentExecuteContext){
+    private void afterAllTaskExecuted(ChatDTO chatDTO,AgentExecuteContext context){
 
-        if(ObjectUtil.isNull(agentExecuteContext)){
+        if(context.isRunAgent()){
             AgentMemory agentMemory=context.getMemory();
             agentMemoryService.saveMemory(chatDTO.getChatId(),agentMemory);
         }
@@ -164,7 +166,7 @@ public class AgentTaskExecutor {
 
     private AgentMemory getMemory(ChatDTO chatDTO)
     {
-        AgentMemory agentMemory=agentMemoryService.getMemory(chatDTO.getChatId());
+        AgentMemory agentMemory=(AgentMemory)agentMemoryService.getMemory(chatDTO.getChatId());
         if(ObjectUtil.isNull(agentMemory))
         {
             agentMemory=new AgentMemory();
@@ -206,10 +208,11 @@ public class AgentTaskExecutor {
         return replyAgentTask;
     }
 
-    private AgentExecuteContext getNewContext(ChatDTO chatDTO)
+    private AgentExecuteContext getNewAgentContext(ChatDTO chatDTO)
     {
         AgentExecuteContext agentExecuteContext=new AgentExecuteContext();
         agentExecuteContext.setMemory(getMemory(chatDTO));
+        agentExecuteContext.setRunAgent(true);
         return agentExecuteContext;
     }
 

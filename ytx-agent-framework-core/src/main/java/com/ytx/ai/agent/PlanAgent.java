@@ -19,6 +19,7 @@ import com.ytx.ai.agent.util.StringUtils;
 import com.ytx.ai.agent.vo.AgentTask;
 import com.ytx.ai.agent.vo.PlannedTasks;
 import com.ytx.ai.agent.vo.UserIntention;
+import com.ytx.ai.base.util.ResponseUtils;
 import com.ytx.ai.llm.service.LlmService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ public class PlanAgent {
         {
             log.error(AgentConstants.CHAT_TRACE_LOG_MARKER+":{},{} run chatCompletion failed.",chatDTO.getChatId(),"PlanAgent");
         }
-        String jsonData=String.valueOf(response.getChoices().get(0).getMessage().getContent());
+        String jsonData= ResponseUtils.getJsonData(response.getChoices().get(0).getMessage().getContent());
 
         PlannedTasks plannedTasks= JSONUtil.toBean(jsonData,PlannedTasks.class);
         if(ObjectUtil.isEmpty(plannedTasks) || ObjectUtil.isEmpty(plannedTasks.getTasks())){

@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class AgentRefIntentEntity {
 
-    Integer id;
-    int agentId;
-    int intentId;
+    private Integer id;
+    private int agentId;
+    private int intentId;
 }

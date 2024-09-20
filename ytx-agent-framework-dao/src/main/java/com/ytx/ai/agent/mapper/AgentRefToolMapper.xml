@@ -4,7 +4,7 @@
 
 
     <select id="findAgentRefSkills" resultType="com.ytx.ai.agent.entity.AgentRefSkillEntity">
-        SELECT ref.*,s.name
+        SELECT ref.id,ref.agent_id agentId,ref.tool_id toolId,ref.tenant_id tenantId,s.name
         FROM ai_agent_ref_tool ref
         LEFT JOIN ai_skill s ON ref.tool_id=s.id
         WHERE ref.agent_id=#{agentId}

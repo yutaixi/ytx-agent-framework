@@ -4,7 +4,7 @@
 
 
     <select id="findAgentRefIntent" resultType="com.ytx.ai.agent.entity.AgentRefIntentEntity">
-        SELECT ref.*
+        SELECT ref.id,ref.agent_id agentId,ref.intent_id intentId,ref.tenant_id tenantId
         FROM ai_agent_ref_intent ref
         WHERE ref.agent_id=#{agentId}
     </select>

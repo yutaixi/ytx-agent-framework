@@ -56,7 +56,7 @@ public class RequestContext {
 
     public static void setValue(String key,String value){
         Map<String,Object> sessionMap=SESSION.get();
-        if(ObjectUtil.isNotNull(sessionMap))
+        if(ObjectUtil.isNull(sessionMap))
         {
             sessionMap=new HashMap<>();
         }
@@ -66,7 +66,7 @@ public class RequestContext {
 
     public static Object getValue(String key){
         Map<String,Object> sessionMap=SESSION.get();
-        if(ObjectUtil.isNotNull(sessionMap))
+        if(ObjectUtil.isNull(sessionMap))
         {
             return null;
         }

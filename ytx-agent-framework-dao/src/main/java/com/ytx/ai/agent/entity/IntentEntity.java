@@ -8,11 +8,11 @@ import lombok.Setter;
 @Setter
 public class IntentEntity implements Intention {
 
-    String name;
-    String desc;
-    String instruction;
-    String sampleTasks;
-    boolean intentRecognition;
+    private String name;
+    private String desc;
+    private String instruction;
+    private String sampleTasks;
+    private boolean intentRecognition;
 
     @Override
     public boolean intentRecognition() {

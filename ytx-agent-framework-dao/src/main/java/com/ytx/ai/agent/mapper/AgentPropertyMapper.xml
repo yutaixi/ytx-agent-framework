@@ -4,7 +4,7 @@
 
 
     <select id="findAgentProperties" resultType="com.ytx.ai.agent.entity.AgentPropertyEntity">
-        SELECT *
+        SELECT id,agent_id as agentId,property_name as propertyName,property_value as propertyValue,property_group as propertyGroup
         FROM ai_agent_property
         WHERE agent_id=#{agentId}
     </select>

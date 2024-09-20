@@ -9,8 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AgentRefSkillEntity {
-    Integer id;
-    int agentId;
-    int skillId;
-    String name;
+    private Integer id;
+    private int agentId;
+    private int skillId;
+    private String name;
 }

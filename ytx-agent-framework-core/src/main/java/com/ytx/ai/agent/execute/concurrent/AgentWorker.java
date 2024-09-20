@@ -29,7 +29,7 @@ public class AgentWorker implements IWorker<AgentWorkerParam, SubAgentResponse> 
                 workerParam.getAgent().getName(),
                 stopWatch.getLastTaskTimeMillis(),
                 JSONUtil.toJsonStr(result));
-        return null;
+        return result;
     }
 
     @Override

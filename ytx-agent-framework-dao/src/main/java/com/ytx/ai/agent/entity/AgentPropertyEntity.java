@@ -8,9 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AgentPropertyEntity {
-    Integer id;
-    int agentId;
-    String propertyName;
-    String propertyValue;
-    String propertyGroup;
+    private Integer id;
+    private int agentId;
+    private String propertyName;
+    private String propertyValue;
+    private String propertyGroup;
 }
