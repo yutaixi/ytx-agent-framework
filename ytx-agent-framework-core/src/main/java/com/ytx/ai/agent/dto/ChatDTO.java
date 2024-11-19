@@ -13,6 +13,6 @@ public class ChatDTO {
 
     private String question;
     private List<Message> history;
-    private Map<String,String> properties;
+    private Map<String,Object> properties;
     private String chatId;
 }

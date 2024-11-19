@@ -171,12 +171,12 @@ public class AgentTaskExecutor {
         {
             agentMemory=new AgentMemory();
         }
-        Map<String,String> propertyMap=chatDTO.getProperties();
+        Map<String,Object> propertyMap=chatDTO.getProperties();
         if(ObjectUtil.isEmpty(propertyMap)){
             return agentMemory;
         }
-        agentMemory.put(MemoryConstants.USER_PREFERRED_LANGUAGE,propertyMap.get("language"));
-        agentMemory.put(MemoryConstants.CURRENT_LOCATION,propertyMap.get("country"));
+        agentMemory.put(MemoryConstants.USER_PREFERRED_LANGUAGE,propertyMap.get("language")==null?"":(String)propertyMap.get("language"));
+        agentMemory.put(MemoryConstants.CURRENT_LOCATION,propertyMap.get("country")==null?"":(String) propertyMap.get("country"));
         return agentMemory;
     }
 
