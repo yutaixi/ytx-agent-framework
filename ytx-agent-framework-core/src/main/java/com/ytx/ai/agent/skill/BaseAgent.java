@@ -1,6 +1,6 @@
 package com.ytx.ai.agent.skill;
 
-import com.ytx.ai.llm.service.LlmService;
+import com.ytx.ai.agent.llm.service.LlmService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseAgent implements AiAgent{

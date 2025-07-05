@@ -2,6 +2,7 @@ package com.ytx.ai.agent.config;
 
 import com.ytx.ai.agent.service.AgentService;
 import com.ytx.ai.agent.service.DBBasedAgentHolder;
+import com.ytx.ai.agent.service.SkillService;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,11 @@ public class AgentDaoConfig {
     public AgentService agentService()
     {
         return new AgentService();
+    }
+
+    @Bean
+    public SkillService skillService(){
+        return new SkillService();
     }
 
     @Bean

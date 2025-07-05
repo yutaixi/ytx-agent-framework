@@ -7,21 +7,25 @@
     <groupId>com.ytx.ai</groupId>
     <artifactId>ytx-agent-framework</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <modules>
         <module>ytx-agent-framework-core</module>
         <module>ytx-agent-framework-dao</module>
         <module>ytx-agent-framework-llm</module>
         <module>ytx-agent-framework-base</module>
+        <module>ytx-agent-framework-sandbox</module>
+        <module>ytx-agent-framework-workflow</module>
+        <module>ytx-agent-framework-log</module>
     </modules>
 
     <properties>
-        <rivision>1.0-SNAPSHOT</rivision>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <spring.cloud.version>2021.0.7</spring.cloud.version>
-        <spring.boot.version>2.7.11</spring.boot.version>
-        <mybatis.plus.version>3.5.2</mybatis.plus.version>
+        <revision>1.0-SNAPSHOT</revision>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <spring.boot.version>2.7.17</spring.boot.version>
+        <spring.cloud.version>2021.0.9</spring.cloud.version>
+        <mybatis.plus.version>3.5.3.1</mybatis.plus.version>
+        <lombok.version>1.18.38</lombok.version>
     </properties>
 
 

@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.ytx.ai.workflow.config.WorkflowConfig,\
+com.ytx.ai.workflow.config.WorkflowContextAware

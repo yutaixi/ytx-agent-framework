@@ -7,4 +7,8 @@ public class CacheConstants {
 
     public static final String LOCAL_CACHE_AGENT_INFO_KEY="agent:info:%s";
 
+    public static final String REDIS_SKILL_VER_KEY = "skill:ver:%s";
+    public static final String LOCAL_CACHE_SKILL_INFO_KEY = "skill:info:%s";
+
+
 }

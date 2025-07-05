@@ -20,7 +20,7 @@ import com.ytx.ai.agent.vo.AgentTask;
 import com.ytx.ai.agent.vo.PlannedTasks;
 import com.ytx.ai.agent.vo.UserIntention;
 import com.ytx.ai.base.util.ResponseUtils;
-import com.ytx.ai.llm.service.LlmService;
+import com.ytx.ai.agent.llm.service.LlmService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 

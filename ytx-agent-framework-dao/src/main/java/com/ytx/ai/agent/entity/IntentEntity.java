@@ -1,9 +1,10 @@
 package com.ytx.ai.agent.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.ytx.ai.agent.Intention.Intention;
 import lombok.Getter;
 import lombok.Setter;
-
+@TableName("ai_intention")
 @Getter
 @Setter
 public class IntentEntity implements Intention {

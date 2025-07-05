@@ -1,6 +1,7 @@
 package com.ytx.ai.agent.dto;
 
 import com.plexpt.chatgpt.entity.chat.Message;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 
 @Getter
 @Setter
+@Builder
 public class ChatDTO {
 
     private String question;

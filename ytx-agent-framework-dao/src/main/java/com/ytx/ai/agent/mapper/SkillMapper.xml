@@ -6,4 +6,10 @@
     <select id="queryAll" resultType="com.ytx.ai.agent.entity.SkillEntity">
         SELECT * FROM ai_skill
     </select>
+
+    <select id="find" resultType="com.ytx.ai.agent.entity.SkillEntity">
+        SELECT *
+        FROM `ai_skill`
+        WHERE id=#{skillId}
+    </select>
 </mapper>
