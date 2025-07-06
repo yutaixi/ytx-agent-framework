@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ValueSource {
 
-    private String type;
+    private String type;//ref,literal
     private String nId;
     private String vName;
     private String vGroup;
