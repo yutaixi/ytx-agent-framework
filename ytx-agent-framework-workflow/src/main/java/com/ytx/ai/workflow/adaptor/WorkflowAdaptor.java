@@ -8,14 +8,11 @@ import cn.hutool.json.JSONUtil;
 import com.ytx.ai.agent.entity.SkillEntity;
 import com.ytx.ai.workflow.*;
 import com.ytx.ai.workflow.enums.ComponentTypeEnum;
-import com.ytx.ai.workflow.enums.PluginTypeIdEnum;
 import com.ytx.ai.workflow.plugin.Plugin;
 import com.ytx.ai.workflow.register.WorkflowPluginRegister;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class WorkflowAdaptor {
 

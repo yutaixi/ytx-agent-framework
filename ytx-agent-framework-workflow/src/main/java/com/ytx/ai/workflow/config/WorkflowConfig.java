@@ -18,10 +18,10 @@ public class WorkflowConfig {
 //        return new CodePlugin();
 //    }
 //
-//    @Bean
-//    public ConditionPlugin conditionPlugin() {
-//        return new ConditionPlugin();
-//    }
+    @Bean
+    public ConditionPlugin conditionPlugin() {
+        return new ConditionPlugin();
+    }
 //
 //    @Bean
 //    public HttpPlugin httpPlugin() {

@@ -181,7 +181,7 @@ public class ConditionPlugin extends BasicPlugin {
     @Setter
     public static class LogicBranch {
         private String id;
-        private String opt;
+        private String opt=ConditionOptEnum.AND.getOpt();
         private Integer priority;
         private Boolean result;
         private List<ConditionItem> conditions;
