@@ -13,10 +13,10 @@ public class WorkflowConfig {
         return new FlowExecutor();
     }
 
-//    @Bean
-//    public CodePlugin codePlugin() {
-//        return new CodePlugin();
-//    }
+    @Bean
+    public CodePlugin codePlugin() {
+        return new CodePlugin();
+    }
 //
     @Bean
     public ConditionPlugin conditionPlugin() {

@@ -43,7 +43,7 @@ public class LlmPlugin extends BasicPlugin {
                 .model(nodeMeta.getModelCode())
                 .build();
 
-        if (ObjectUtil.isNotEmpty(nodeMeta.getResponseFormat())) {
+        if (ObjectUtil.isNotEmpty(nodeMeta.getResponseFormat()) ) {
             if ("json".equalsIgnoreCase(nodeMeta.getResponseFormat())) {
                 llmChatCompletion.setResponseFormat(ResponseFormat.Type.JSON_OBJECT.getValue());
             }
@@ -52,7 +52,6 @@ public class LlmPlugin extends BasicPlugin {
         String content = llmService.chatCompletion(llmChatCompletion);
         Value outputValue=nodeMeta.getOutputs().getFirst();
         outputValue.setContent(content);
-
         return PluginOutput.of();
     }
 

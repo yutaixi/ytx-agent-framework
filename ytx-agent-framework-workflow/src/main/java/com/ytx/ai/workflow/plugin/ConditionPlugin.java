@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.ytx.ai.workflow.FlowNode;
 import com.ytx.ai.workflow.NodeMeta;
 import com.ytx.ai.workflow.Value;
+import com.ytx.ai.workflow.annotation.DependsRef;
 import com.ytx.ai.workflow.enums.ConditionOptEnum;
 import com.ytx.ai.workflow.enums.PluginTypeIdEnum;
 import com.ytx.ai.workflow.enums.ValueTypeEnum;
@@ -24,6 +25,7 @@ public class ConditionPlugin extends BasicPlugin {
     @Setter
     public static class ConditionNodeMeta implements NodeMeta{
 
+        @DependsRef
         private List<LogicBranch> logicBranches;
 
     }
@@ -184,6 +186,7 @@ public class ConditionPlugin extends BasicPlugin {
         private String opt=ConditionOptEnum.AND.getOpt();
         private Integer priority;
         private Boolean result;
+        @DependsRef
         private List<ConditionItem> conditions;
     }
 
@@ -191,8 +194,10 @@ public class ConditionPlugin extends BasicPlugin {
     @Setter
     public static class ConditionItem {
         private String id;
+        @DependsRef
         private Value left;
         private String opt;
+        @DependsRef
         private Value right;
         private Boolean result;
     }

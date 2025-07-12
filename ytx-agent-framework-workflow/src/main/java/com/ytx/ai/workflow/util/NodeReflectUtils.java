@@ -5,6 +5,7 @@ import com.ytx.ai.workflow.NodeMeta;
 import com.ytx.ai.workflow.Value;
 import com.ytx.ai.workflow.annotation.DependsRef;
 import com.ytx.ai.workflow.annotation.DependsVariable;
+import com.ytx.ai.workflow.enums.ValueSourceTypeEnum;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -73,52 +74,61 @@ public class NodeReflectUtils {
         return targetValue;
     }
 
-    /**
-     * 获取所有引用其他节点值的变量
-     * @param nodeMeta
-     * @return
-     */
+
     public static List<Value> getValuesToResolveRef(NodeMeta nodeMeta) {
-        // 获取所有字段
-        List<Field> fields = getAllFields(nodeMeta.getClass());
-        if (fields.isEmpty()) {
-            return Collections.emptyList();
+        List<Value> result = new ArrayList<>();
+        Deque<Object> stack = new ArrayDeque<>();
+        Set<Object> processed = new HashSet<>();
+
+        // 初始压入NodeMeta对象
+        stack.push(nodeMeta);
+
+        while (!stack.isEmpty()) {
+            Object current = stack.pop();
+            if (current == null || processed.contains(current)) {
+                continue;
+            }
+            processed.add(current);
+
+            List<Field> fields = getAllFields(current.getClass());
+
+            fields.stream()
+                    .filter(field -> field.getAnnotation(DependsRef.class) != null)
+                    .forEach(field -> {
+                        try {
+                            field.setAccessible(true);
+                            Object value = field.get(current);
+
+                            if (value instanceof Collection) {
+                                ((Collection<?>) value).forEach(item -> {
+                                    if (item instanceof Value) {
+                                        result.add((Value) item);
+                                    }
+                                    // 压入集合元素进行深度处理
+                                    stack.push(item);
+                                });
+                            } else if (value instanceof Value) {
+                                result.add((Value) value);
+                                // 压入Value对象进行深度处理
+                                stack.push(value);
+                            } else if (value != null) {
+                                // 压入普通对象进行深度处理
+                                stack.push(value);
+                            }
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
 
-        // 过滤带有 @Before 注解的字段
-        return fields.stream()
-                .filter(field -> field.getAnnotation(DependsRef.class) != null)
-                .map(field -> {
-                    try {
-                        field.setAccessible(true); // 允许访问私有字段
-                        return field.get(nodeMeta); // 获取字段值
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .filter(Objects::nonNull) // 过滤空值
-                .flatMap(value -> {
-                    // 判断字段值的类型
-                    if (value instanceof Collection) {
-                        // 如果是集合类型，遍历集合中的元素，并且只保留 Value 类型的元素
-                        return ((Collection<?>) value).stream()
-                                .filter(item -> item instanceof Value)
-                                .map(item->{
-                                    return (Value)item;
-                                });
-                    } else if (value instanceof Value) {
-                        // 如果是 Value 类型，直接返回
-                        return Stream.of((Value)value);
-                    } else if (value instanceof Integer) {
-                        // 如果是 int 类型，忽略
-                        return Stream.empty();
-                    } else {
-                        // 其他类型，直接返回
-                        return Stream.empty();
-                    }
-                })
-                .collect(Collectors.toList());
+//        return result.stream().filter(item->{
+//            return ObjectUtil.isNotEmpty(item.getSource()) && ObjectUtil.equals(ValueSourceTypeEnum.REFERENCE.getSource(),item.getSource().getType());
+//        }).collect(Collectors.toList());
+
+        return result;
     }
+
+
     /**
      * 获取所有引用其他节点值的变量，并转为数组
      * @param nodeMeta

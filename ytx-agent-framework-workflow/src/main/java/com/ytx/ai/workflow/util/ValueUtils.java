@@ -248,6 +248,9 @@ public class ValueUtils {
         variables.forEach(variable -> {
             // 获取变量值
             Object variableValue = getVariableValue(variable, values, flowContext);
+            if(variableValue==null){
+                return;
+            }
             // 替换变量值
             valueContent.set(replaceVariableValue(valueContent.get(), variable, variableValue));
         });
