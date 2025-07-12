@@ -20,20 +20,22 @@ public class RedisConfig  extends CachingConfigurerSupport {
         template.setConnectionFactory(connectionFactory);
 
         JSON2JsonRedisSerializer serializer = new JSON2JsonRedisSerializer(Object.class);
+        // 添加字符串专用序列化器
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         serializer.setObjectMapper(mapper);
 
-
         // 使用StringRedisSerializer序列化和反序列化redis的key值
-        template.setKeySerializer(new StringRedisSerializer());
+        template.setKeySerializer(stringSerializer);
         // 使用StringRedisSerializer序列化和反序列化redis hash类型的key值
-        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(stringSerializer);
+        template.setValueSerializer(stringSerializer);
         // 序列化和反序列化redis hash类型的value值
         template.setHashValueSerializer(serializer);
-        template.setValueSerializer(serializer);
         template.afterPropertiesSet();
         return template;
     }

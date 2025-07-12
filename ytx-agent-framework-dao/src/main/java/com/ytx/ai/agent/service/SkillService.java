@@ -36,7 +36,7 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
         Object cachedObj = caffeineCache.getIfPresent(String.format(LOCAL_CACHE_SKILL_INFO_KEY, skillId));
         if (ObjectUtil.isNotNull(cachedObj) && cachedObj instanceof SkillEntity cachedVal) {
             int latestVer = this.getSkillVersion(skillId);
-            if (cachedVal.getVer() == latestVer || latestVer < -1) {
+            if ((cachedVal.getVer()!=null && cachedVal.getVer() == latestVer) || latestVer < -1) {
                 return cachedVal;
             }
         }
@@ -53,6 +53,7 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
     public boolean upsertSkill(SkillEntity skill){
         if(ObjectUtil.isNotEmpty(skill.getId())){
             this.getBaseMapper().updateById(skill);
+            deleteCache(skill.getId());
         }else{
             this.getBaseMapper().insert(skill);
         }
@@ -80,20 +81,34 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
 
     private void updateCache(Integer skillId, SkillEntity skillEntity) {
         caffeineCache.put(String.format(LOCAL_CACHE_SKILL_INFO_KEY, skillId), skillEntity);
+        String ver=ObjectUtil.isNotEmpty(skillEntity.getVer())?skillEntity.getVer().toString():null;
+        if(ObjectUtil.isEmpty(ver)){
+            return;
+        }
         try {
-            cacheService.setCacheObject(String.format(REDIS_SKILL_VER_KEY, skillId), skillEntity.getVer());
+            cacheService.setCacheObject(String.format(REDIS_SKILL_VER_KEY, skillId),ver);
         } catch (Exception e) {
             log.error("update cache skill info error", e);
         }
     }
 
-    public int getSkillVersion(Integer skillId) {
-        Integer ver;
+    private void deleteCache(Integer skillId) {
+        caffeineCache.invalidate(String.format(LOCAL_CACHE_SKILL_INFO_KEY, skillId));
         try {
-            ver = cacheService.getCacheObject(String.format(REDIS_SKILL_VER_KEY, skillId));
-            if (ObjectUtil.isNull(ver)) {
+            cacheService.deleteKey(String.format(REDIS_SKILL_VER_KEY, skillId));
+        } catch (Exception e) {
+            log.error("delete cache skill info error", e);
+        }
+    }
+
+    public int getSkillVersion(Integer skillId) {
+        Integer ver=null;
+        try {
+            String verStr = cacheService.getCacheString(String.format(REDIS_SKILL_VER_KEY, skillId));
+            if (ObjectUtil.isNull(verStr)) {
                 ver = -1;
             }
+            ver=Integer.valueOf(verStr);
         } catch (Exception e) {
             ver = -100;
             log.error("get agent ver error", e);

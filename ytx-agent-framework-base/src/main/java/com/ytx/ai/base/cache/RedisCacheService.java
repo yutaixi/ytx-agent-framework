@@ -20,6 +20,17 @@ public class RedisCacheService implements CacheService{
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Override
+    public void setCacheString(String key, String value) {
+        redisTemplate.opsForValue().set(key,value);
+    }
+
+    @Override
+    public String getCacheString(String key) {
+        ValueOperations<String, String> operation = redisTemplate.opsForValue();
+        return operation.get(key);
+    }
+
     /**
      * 缓存基本的对象，Integer、String、实体类等
      *

@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 public interface CacheService {
 
+    public void setCacheString(final String key,final String value);
+    public String getCacheString(final String key);
+
     public <T> void setCacheObject(final String key, final T value);
 
     /**
