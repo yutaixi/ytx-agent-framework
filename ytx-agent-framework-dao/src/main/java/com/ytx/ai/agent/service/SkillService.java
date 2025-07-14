@@ -67,10 +67,10 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
         QueryWrapper<SkillEntity> queryWrapper = new QueryWrapper<>();
 
         // 根据传入的实体动态构造查询条件（示例）
-        if (skill.getName() != null) {
+        if (ObjectUtil.isNotEmpty(skill.getName())) {
             queryWrapper.like("name", skill.getName()); // 按名称模糊查询
         }
-        if (skill.getType() != null) {
+        if (ObjectUtil.isNotEmpty(skill.getType())) {
             queryWrapper.eq("type", skill.getType()); // 按类型精确查询
         }
         // 执行分页查询
