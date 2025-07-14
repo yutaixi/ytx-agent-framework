@@ -16,6 +16,7 @@
         <module>ytx-agent-framework-sandbox</module>
         <module>ytx-agent-framework-workflow</module>
         <module>ytx-agent-framework-log</module>
+        <module>ytx-agent-framework-web</module>
     </modules>
 
     <properties>

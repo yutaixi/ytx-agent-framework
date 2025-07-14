@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.ytx.ai.agent.entity.SkillEntity;
 import com.ytx.ai.agent.mapper.SkillMapper;
+import com.ytx.ai.agent.vo.PageSearchVO;
 import com.ytx.ai.agent.vo.PageVO;
 import com.ytx.ai.base.cache.CacheService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +19,6 @@ import static com.ytx.ai.agent.constant.CacheConstants.REDIS_SKILL_VER_KEY;
 
 @Slf4j
 public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
-
-//    @Autowired
-//    private SkillMapper skillMapper;
 
     @Autowired
     private CacheService cacheService;
@@ -60,10 +58,11 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
         return true;
     }
 
-    public PageVO<SkillEntity> querySkill(SkillEntity skill, int page, int size) {
+    public PageVO<SkillEntity> querySkill(PageSearchVO<SkillEntity> pageSearchVO) {
         // 创建分页对象
-        Page<SkillEntity> pageRequest = new Page<>(page, size);
+        Page<SkillEntity> pageRequest = new Page<>(pageSearchVO.getCurrent(), pageSearchVO.getSize());
 
+        SkillEntity skill=pageSearchVO.getData();
         // 构造查询条件
         QueryWrapper<SkillEntity> queryWrapper = new QueryWrapper<>();
 
@@ -77,6 +76,12 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
         // 执行分页查询
         Page<SkillEntity> pagedRecords= this.getBaseMapper().selectPage(pageRequest, queryWrapper);
         return PageVO.of(pagedRecords);
+    }
+
+    public boolean deleteSkill(Integer skillId){
+        this.getBaseMapper().deleteById(skillId);
+        deleteCache(skillId);
+        return true;
     }
 
     private void updateCache(Integer skillId, SkillEntity skillEntity) {
