@@ -48,14 +48,16 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
         return skillEntity;
     }
 
-    public boolean upsertSkill(SkillEntity skill){
-        if(ObjectUtil.isNotEmpty(skill.getId())){
+    public Integer upsertSkill(SkillEntity skill){
+        Integer skillId=skill.getId();
+        if(ObjectUtil.isNotEmpty(skillId)){
             this.getBaseMapper().updateById(skill);
             deleteCache(skill.getId());
         }else{
             this.getBaseMapper().insert(skill);
+            skillId=skill.getId();
         }
-        return true;
+        return skillId;
     }
 
     public PageVO<SkillEntity> querySkill(PageSearchVO<SkillEntity> pageSearchVO) {
@@ -112,8 +114,10 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
             String verStr = cacheService.getCacheString(String.format(REDIS_SKILL_VER_KEY, skillId));
             if (ObjectUtil.isNull(verStr)) {
                 ver = -1;
+            }else{
+                ver=Integer.valueOf(verStr);
             }
-            ver=Integer.valueOf(verStr);
+
         } catch (Exception e) {
             ver = -100;
             log.error("get agent ver error", e);
