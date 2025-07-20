@@ -13,6 +13,7 @@ import com.ytx.ai.workflow.Workflow;
 import com.ytx.ai.workflow.WorkflowOutput;
 import com.ytx.ai.workflow.execute.concurrent.FlowWorker;
 import com.ytx.ai.workflow.execute.concurrent.FlowWorkerParam;
+import com.ytx.ai.workflow.plugin.FlowEnd;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -103,7 +104,7 @@ public class FlowExecutor {
                 .toList();
 
         try {
-            Async.beginWork(300000L, ttlExecutorService, workers);
+            Async.beginWork(30000L, ttlExecutorService, workers);
         } catch (ExecutionException | InterruptedException e) {
             stopWatch.stop();
             throw new RuntimeException(e);
@@ -112,6 +113,8 @@ public class FlowExecutor {
         stopWatch.stop();
         log.info("workflow " + workFlow.getName() + ":" + workFlow.getId() +
                 " time cost: " + stopWatch.getLastTaskTimeMillis() + "ms");
+
+
         summary(workFlowOutput, finalContext, workFlowWrapper, stopWatch.getLastTaskTimeMillis());
         return workFlowOutput;
     }

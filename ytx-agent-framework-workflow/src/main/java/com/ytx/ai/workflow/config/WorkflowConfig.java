@@ -42,4 +42,10 @@ public class WorkflowConfig {
     public FlowEnd flowEnd() {
         return new FlowEnd();
     }
+
+
+    @Bean
+    public SubProcessPlugin subProcessPlugin() {
+        return new SubProcessPlugin();
+    }
 }

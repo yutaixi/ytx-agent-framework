@@ -7,7 +7,8 @@ public enum PluginTypeIdEnum {
     LLM( "llm",  "调用大语言模型，使用变量和提示词生成回复"),
     HTTP( "http",  "http请求"),
     CONDITION( "condition",  "条件分支"),
-    CODE( "code",  "编写代码，处理输入变量来生成返回值");
+    CODE( "code",  "编写代码，处理输入变量来生成返回值"),
+    SUBPROCESS( "subProcess",  "子流程");
 
     private final String type;
     private final String description;
