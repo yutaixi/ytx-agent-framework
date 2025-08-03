@@ -11,10 +11,7 @@ import com.ytx.ai.workflow.enums.ValueTypeEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,6 +48,24 @@ public class ValueUtils {
         }
 
         return result;
+    }
+
+
+    public static String getValueType(Object value){
+
+        if(value instanceof Number){
+            return ValueTypeEnum.NUMBER.getType();
+        }
+        if(value instanceof String){
+            return ValueTypeEnum.STRING.getType();
+        }
+        if(value instanceof Boolean){
+            return ValueTypeEnum.BOOLEAN.getType();
+        }
+        if(value instanceof Date){
+            return ValueTypeEnum.TIME.getType();
+        }
+        return ValueTypeEnum.OBJECT.getType();
     }
 
     public static <T> T getValue(String name, Map<String, Value> dataMap) {
@@ -361,6 +376,52 @@ public class ValueUtils {
             valueMap.put(item.getName(),item);
         });
         return valueMap;
+    }
+
+
+    public static void expandInputs(NodeMeta nodeMeta, FlowContext flowContext){
+
+        if(ObjectUtil.isEmpty(nodeMeta.getInputs())){
+            return;
+        }
+        Map<String,Value> valueMap=toMap(nodeMeta.getInputs());
+        List<Field> fields=NodeReflectUtils.getExpandInputsFields(nodeMeta);
+        for(Field field:fields){
+             String name=field.getName();
+             Value value=valueMap.get(name);
+             if(ObjectUtil.isNotEmpty(value)){
+                 try {
+                     field.set(nodeMeta,value.getContent());
+                 } catch (IllegalAccessException e) {
+                     throw new RuntimeException(e);
+                 }
+             }
+        }
+    }
+
+    public static void contractOutputs(NodeMeta nodeMeta, FlowContext flowContext){
+        List<Field> fields=NodeReflectUtils.getContractOutputsFields(nodeMeta);
+        if(ObjectUtil.isEmpty(fields)){
+            return;
+        }
+        Map<String,Value> outputValueMap=new HashMap<>();
+        if(ObjectUtil.isNotEmpty(nodeMeta.getOutputs())){
+            outputValueMap=toMap(nodeMeta.getOutputs());
+        }
+        for(Field field:fields){
+            String name=field.getName();
+            try {
+                Object value=field.get(nodeMeta);
+
+                Value outputValue=outputValueMap.computeIfAbsent(name,item->Value.builder().name(name).build());
+                outputValue.setContent(value);
+                outputValue.setType(getValueType(value));
+
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        nodeMeta.setOutputs(outputValueMap.values().stream().toList());
     }
 
 }

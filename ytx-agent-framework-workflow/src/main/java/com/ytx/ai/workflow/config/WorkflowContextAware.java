@@ -1,7 +1,7 @@
 package com.ytx.ai.workflow.config;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.ytx.ai.workflow.plugin.Plugin;
+import com.ytx.ai.workflow.plugin.WorkflowPlugin;
 import com.ytx.ai.workflow.register.WorkflowPluginRegister;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -14,7 +14,7 @@ public class WorkflowContextAware implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        Map<String, Plugin> pluginMap = applicationContext.getBeansOfType(Plugin.class);
+        Map<String, WorkflowPlugin> pluginMap = applicationContext.getBeansOfType(WorkflowPlugin.class);
         if (ObjectUtil.isNotEmpty(pluginMap)) {
             pluginMap.forEach((k, v) -> {
                 WorkflowPluginRegister.register(v);

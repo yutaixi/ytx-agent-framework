@@ -49,6 +49,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.ytx.ai</groupId>
+            <artifactId>ytx-agent-framework-llm</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

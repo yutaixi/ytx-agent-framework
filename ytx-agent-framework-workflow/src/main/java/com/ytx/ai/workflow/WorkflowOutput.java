@@ -1,5 +1,8 @@
 package com.ytx.ai.workflow;
 
+import cn.hutool.core.annotation.Alias;
+import cn.hutool.core.annotation.PropIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WorkflowOutput {
     private Map<String, Value> outputs;
     private String answer;
+    @PropIgnore
+    @JsonIgnore
     private String costSummary;
+    private boolean stopTheWorld;
 
     public static WorkflowOutput of() {
         WorkflowOutput output = new WorkflowOutput();

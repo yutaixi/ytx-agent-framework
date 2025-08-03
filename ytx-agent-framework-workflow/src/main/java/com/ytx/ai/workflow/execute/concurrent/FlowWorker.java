@@ -13,7 +13,7 @@ import com.ytx.ai.workflow.*;
 import com.ytx.ai.workflow.execute.FlowContext;
 import com.ytx.ai.workflow.execute.FlowExecutor;
 import com.ytx.ai.workflow.execute.WorkflowWrapper;
-import com.ytx.ai.workflow.plugin.Plugin;
+import com.ytx.ai.workflow.plugin.WorkflowPlugin;
 import com.ytx.ai.workflow.plugin.PluginOutput;
 import com.ytx.ai.workflow.register.WorkflowPluginRegister;
 import com.ytx.ai.workflow.util.ValueUtils;
@@ -89,8 +89,8 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
             // 插件类型，默认认为插件
             case plugin:
             default: {
-                Plugin plugin = WorkflowPluginRegister.get(flowNode.getComponentId());
-                PluginOutput pluginOutput = plugin.run(flowWorkerParam.getFlowNode(), flowWorkerParam.getFlowContext());
+                WorkflowPlugin workflowPlugin = WorkflowPluginRegister.get(flowNode.getComponentId());
+                PluginOutput pluginOutput = workflowPlugin.run(flowWorkerParam.getFlowNode(), flowWorkerParam.getFlowContext());
                 output.setData(pluginOutput.getData());
                 output.setNodeMeta(pluginOutput.getNodeMeta());
                 output.setAnswer(pluginOutput.getAnswer());
@@ -124,8 +124,11 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
         context.addNodeOutput(node.getId(), nodeOutput);
 
         if (node.isEndNode()) {
-            workFlowOutput.setOutputs(nodeOutput.getData());
-            workFlowOutput.setAnswer(nodeOutput.getAnswer());
+            if(ObjectUtil.isNotEmpty(nodeOutput.getAnswer())){
+                workFlowOutput.setAnswer(nodeOutput.getAnswer());
+            }else{
+                workFlowOutput.setOutputs(nodeOutput.getData());
+            }
         }
     }
 

@@ -123,7 +123,7 @@ public class TestJavascript {
         console.log(testFunction.getName());
         // 同步函数定义
         function main({ params }) {
-            console.log('this is code plugin running.');
+            console.log('this is code workflowPlugin running.');
             const ret = {
                 body: 'this is body'
             };

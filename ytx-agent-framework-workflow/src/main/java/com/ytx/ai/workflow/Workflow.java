@@ -1,7 +1,7 @@
 package com.ytx.ai.workflow;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.ytx.ai.agent.entity.SkillEntity;
+import com.ytx.ai.base.workflow.Flow;
 import com.ytx.ai.workflow.adaptor.WorkflowAdaptor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,19 +20,19 @@ public class Workflow {
     private List<FlowNode> nodes;
     private List<FlowEdge> edges;
 
-    public static Workflow of(SkillEntity skillEntity) {
+    public static Workflow of(Flow flow) {
         Workflow workflow = Workflow.builder()
-                .id(skillEntity.getId())
-                .name(skillEntity.getName())
-                .description(skillEntity.getDescription())
+                .id(flow.getId())
+                .name(flow.getName())
+                .description(flow.getDescription())
                 .build();
 
-        switch (skillEntity.getType()) {
+        switch (flow.getType()) {
             case "workflow":
-                if (ObjectUtil.isEmpty(skillEntity.getDefinition())) {
+                if (ObjectUtil.isEmpty(flow.getDefinition())) {
                     break;
                 }
-                workflow=WorkflowAdaptor.parse(skillEntity);
+                workflow=WorkflowAdaptor.parse(flow);
                 break;
 
             case "native":

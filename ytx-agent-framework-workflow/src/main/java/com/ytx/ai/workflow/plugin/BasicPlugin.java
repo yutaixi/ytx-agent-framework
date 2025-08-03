@@ -2,14 +2,16 @@ package com.ytx.ai.workflow.plugin;
 
 import cn.hutool.core.date.StopWatch;
 import com.ytx.ai.workflow.FlowNode;
+import com.ytx.ai.workflow.Value;
 import com.ytx.ai.workflow.execute.FlowContext;
 import com.ytx.ai.workflow.util.ValueUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Slf4j
-public abstract class BasicPlugin implements Plugin {
+public abstract class BasicPlugin implements WorkflowPlugin {
 
     @PostConstruct
     public void initBean() {
@@ -40,7 +42,7 @@ public abstract class BasicPlugin implements Plugin {
     private void parseParamBeforeRun(FlowNode flowNode, FlowContext flowContext) {
         ValueUtils.resolveRefValues(flowNode.getMeta(), flowContext);
         ValueUtils.resolveVariables(flowNode.getMeta(),flowContext);
-
+        ValueUtils.expandInputs(flowNode.getMeta(),flowContext);
     }
 
     @Override
@@ -74,6 +76,11 @@ public abstract class BasicPlugin implements Plugin {
      */
     private void after(FlowNode flowNode, PluginOutput response, FlowContext flowContext) {
         response.setNodeMeta(flowNode.getMeta());
+        ValueUtils.contractOutputs(flowNode.getMeta(),flowContext);
+    }
+
+
+    protected void setValue(String valueName, Object content, List<Value> values){
 
     }
 }

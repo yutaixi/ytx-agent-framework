@@ -1,10 +1,10 @@
 package com.ytx.ai.workflow.util;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.ytx.ai.workflow.FlowNode;
 import com.ytx.ai.workflow.NodeMeta;
 import com.ytx.ai.workflow.Value;
-import com.ytx.ai.workflow.annotation.DependsRef;
-import com.ytx.ai.workflow.annotation.DependsVariable;
+import com.ytx.ai.workflow.annotation.*;
 import com.ytx.ai.workflow.enums.ValueSourceTypeEnum;
 
 import java.lang.reflect.Field;
@@ -128,6 +128,60 @@ public class NodeReflectUtils {
         return result;
     }
 
+    public static List<Field> getExpandInputsFields(NodeMeta nodeMeta) {
+        List<Field> result = new ArrayList<>();
+        Deque<Object> stack = new ArrayDeque<>();
+        Set<Object> processed = new HashSet<>();
+
+        // 初始压入NodeMeta对象
+        stack.push(nodeMeta);
+
+        while (!stack.isEmpty()) {
+            Object current = stack.pop();
+            if (current == null || processed.contains(current)) {
+                continue;
+            }
+            processed.add(current);
+
+            List<Field> fields = getAllFields(current.getClass());
+
+            fields.stream()
+                    .filter(field -> field.getAnnotation(ExpandInputs.class) != null)
+                    .forEach(field -> {
+                        field.setAccessible(true);
+                        result.add(field);
+                    });
+        }
+        return result;
+    }
+
+    public static List<Field> getContractOutputsFields(NodeMeta nodeMeta) {
+        List<Field> result = new ArrayList<>();
+        Deque<Object> stack = new ArrayDeque<>();
+        Set<Object> processed = new HashSet<>();
+
+        // 初始压入NodeMeta对象
+        stack.push(nodeMeta);
+
+        while (!stack.isEmpty()) {
+            Object current = stack.pop();
+            if (current == null || processed.contains(current)) {
+                continue;
+            }
+            processed.add(current);
+
+            List<Field> fields = getAllFields(current.getClass());
+
+            fields.stream()
+                    .filter(field -> field.getAnnotation(ContractOutputs.class) != null)
+                    .forEach(field -> {
+                        field.setAccessible(true);
+                        result.add(field);
+                    });
+        }
+        return result;
+    }
+
 
     /**
      * 获取所有引用其他节点值的变量，并转为数组
@@ -184,5 +238,22 @@ public class NodeReflectUtils {
             clazz = clazz.getSuperclass();
         }
         return fields;
+    }
+
+
+    public static boolean isStartNode(FlowNode node){
+        if(ObjectUtil.isEmpty(node.getMeta())){
+            return false;
+        }
+        StartNode startNode= node.getMeta().getClass().getAnnotation(StartNode.class);
+        return ObjectUtil.isNotEmpty(startNode);
+
+    }
+    public static boolean isEndNode(FlowNode node){
+        if(ObjectUtil.isEmpty(node.getMeta())){
+            return false;
+        }
+        EndNode endNode= node.getMeta().getClass().getAnnotation(EndNode.class);
+        return ObjectUtil.isNotEmpty(endNode);
     }
 }

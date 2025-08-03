@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.ytx.ai</groupId>
-            <artifactId>ytx-agent-framework-core</artifactId>
+            <artifactId>ytx-agent-framework-base</artifactId>
             <version>${revision}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jdbc -->

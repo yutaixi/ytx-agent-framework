@@ -6,9 +6,10 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.ytx.ai.agent.entity.SkillEntity;
+import com.ytx.ai.base.workflow.Flow;
 import com.ytx.ai.workflow.*;
 import com.ytx.ai.workflow.enums.ComponentTypeEnum;
-import com.ytx.ai.workflow.plugin.Plugin;
+import com.ytx.ai.workflow.plugin.WorkflowPlugin;
 import com.ytx.ai.workflow.register.WorkflowPluginRegister;
 
 import java.util.ArrayList;
@@ -16,10 +17,10 @@ import java.util.List;
 
 public class WorkflowAdaptor {
 
-    public static Workflow parse(SkillEntity skill){
+    public static Workflow parse(Flow flow){
 
-        Workflow workflow=Workflow.builder().id(skill.getId()).name(skill.getName()).description(skill.getDescription()).build();
-        String definition=skill.getDefinition();
+        Workflow workflow=Workflow.builder().id(flow.getId()).name(flow.getName()).description(flow.getDescription()).build();
+        String definition=flow.getDefinition();
         if(ObjectUtil.isEmpty(definition)){
             return workflow;
         }
@@ -48,8 +49,8 @@ public class WorkflowAdaptor {
                     .componentType(ComponentTypeEnum.plugin)
                     .componentId(nodeData.getStr("type"))
                     .build();
-            Plugin plugin= WorkflowPluginRegister.get(flowNode.getComponentId());
-            NodeMeta nodeMeta=JSONUtil.toBean(nodeData,plugin.getMetaClass());
+            WorkflowPlugin workflowPlugin = WorkflowPluginRegister.get(flowNode.getComponentId());
+            NodeMeta nodeMeta=JSONUtil.toBean(nodeData, workflowPlugin.getMetaClass());
             flowNode.setMeta(nodeMeta);
             flowNodes.add(flowNode);
         }

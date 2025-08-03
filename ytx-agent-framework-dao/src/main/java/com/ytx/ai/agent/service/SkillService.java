@@ -2,6 +2,7 @@ package com.ytx.ai.agent.service;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -10,6 +11,7 @@ import com.ytx.ai.agent.mapper.SkillMapper;
 import com.ytx.ai.agent.vo.PageSearchVO;
 import com.ytx.ai.agent.vo.PageVO;
 import com.ytx.ai.base.cache.CacheService;
+import com.ytx.ai.base.exception.BizException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -57,6 +59,19 @@ public class SkillService extends ServiceImpl<SkillMapper,SkillEntity> {
             this.getBaseMapper().insert(skill);
             skillId=skill.getId();
         }
+        return skillId;
+    }
+
+    public Integer updateDescription(SkillEntity skill) throws BizException {
+        Integer skillId=skill.getId();
+        if(ObjectUtil.isEmpty(skillId)){
+            throw new BizException("skill id can not be empty");
+        }
+        UpdateWrapper<SkillEntity> updateWrapper=new UpdateWrapper<>();
+        updateWrapper.set("description",skill.getDescription());
+        updateWrapper.eq("id",skillId);
+        this.getBaseMapper().update(null,updateWrapper);
+        deleteCache(skill.getId());
         return skillId;
     }
 

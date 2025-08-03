@@ -1,23 +1,23 @@
 package com.ytx.ai.workflow.register;
 
 
-import com.ytx.ai.workflow.plugin.Plugin;
+import com.ytx.ai.workflow.plugin.WorkflowPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class WorkflowPluginRegister {
 
-    private static final Map<String, Plugin> pluginMap = new HashMap<>();
+    private static final Map<String, WorkflowPlugin> pluginMap = new HashMap<>();
 
-    public static void register(Plugin plugin) {
-        if (plugin == null) {
+    public static void register(WorkflowPlugin workflowPlugin) {
+        if (workflowPlugin == null) {
             return;
         }
-        pluginMap.put(plugin.getType(), plugin);
+        pluginMap.put(workflowPlugin.getType(), workflowPlugin);
     }
 
-    public static Plugin get(String pluginType) {
+    public static WorkflowPlugin get(String pluginType) {
         return pluginMap.get(pluginType);
     }
 }
