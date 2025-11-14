@@ -6,6 +6,8 @@ import com.ytx.ai.agent.repository.converter.PgObjectConverter;
 import com.ytx.ai.agent.repository.converter.PgVectorConverter;
 import com.ytx.ai.agent.repository.exception.PgDeleteException;
 import com.ytx.ai.agent.repository.exception.PgInsertException;
+import com.ytx.ai.agent.repository.exception.PgRepositoryException;
+import com.ytx.ai.agent.repository.util.PgTableBuilder;
 import com.ytx.ai.agent.repository.vo.Filter;
 import com.ytx.ai.agent.repository.vo.Node;
 import com.ytx.ai.agent.repository.vo.ScoredRecord;
@@ -34,18 +36,21 @@ public class PgRepository<T extends Node> implements Repository<T> {
     private final PgObjectConverter objectConverter;
     private final PgVectorConverter vectorConverter;
     private final PgRepositoryConfig config;
+    private final PgTableBuilder tableBuilder;
 
     @Autowired
     public PgRepository(NamedParameterJdbcTemplate pgNamedParameterJdbcTemplate,
                        PgSqlBuilder sqlBuilder,
                        PgObjectConverter objectConverter,
                        PgVectorConverter vectorConverter,
-                       PgRepositoryConfig config) {
+                       PgRepositoryConfig config,
+                       PgTableBuilder tableBuilder) {
         this.jdbcTemplate = pgNamedParameterJdbcTemplate;
         this.sqlBuilder = sqlBuilder;
         this.objectConverter = objectConverter;
         this.vectorConverter = vectorConverter;
         this.config = config;
+        this.tableBuilder = tableBuilder;
     }
 
     @Override
@@ -295,17 +300,118 @@ public class PgRepository<T extends Node> implements Repository<T> {
 
     @Override
     public boolean createIndex(String index, Class<?> clazz) {
-        return false;
+        // 检查配置是否允许创建索引（表）
+        if (!config.isEnableCreateIndex()) {
+            throw new PgRepositoryException(
+                "Create index is disabled. Please set 'pg.repository.enable-create-index=true' to enable creating tables."
+            );
+        }
+
+        if (clazz == null) {
+            throw new PgRepositoryException("Class cannot be null");
+        }
+
+        // 如果 index 为空或 null，从 @PgTable 注解或类名推断表名
+        String tableName;
+        if (index == null || index.trim().isEmpty()) {
+            tableName = tableBuilder.getTableName(clazz);
+            if (tableName == null || tableName.trim().isEmpty()) {
+                throw new PgRepositoryException(
+                    "Cannot determine table name. Please specify table name in @PgTable annotation or pass it as parameter."
+                );
+            }
+        } else {
+            tableName = index.trim();
+        }
+
+        try {
+            // 使用 PgTableBuilder 生成 CREATE TABLE DDL 语句
+            String createTableSql = tableBuilder.buildCreateTableSql(tableName, clazz);
+
+            // 执行 DDL 语句
+            jdbcTemplate.getJdbcTemplate().execute(createTableSql);
+
+            return true;
+        } catch (PgRepositoryException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PgRepositoryException("Failed to create table '" + tableName + "': " + e.getMessage(), e);
+        }
     }
 
     @Override
     public boolean createIndex(String index, String describeJson) {
-        return false;
+        // 检查配置是否允许创建索引（表）
+        if (!config.isEnableCreateIndex()) {
+            throw new PgRepositoryException(
+                "Create index is disabled. Please set 'pg.repository.enable-create-index=true' to enable creating tables."
+            );
+        }
+
+        if (index == null || index.trim().isEmpty()) {
+            throw new PgRepositoryException("Table name (index) cannot be null or empty");
+        }
+
+        if (describeJson == null || describeJson.trim().isEmpty()) {
+            throw new PgRepositoryException("Describe JSON cannot be null or empty");
+        }
+
+        try {
+            // 直接执行 JSON 中定义的 DDL（如果有的话）
+            // 这里可以解析 JSON 并生成 DDL，但为了简单起见，假设 JSON 包含完整的 DDL
+            // 实际使用中可能需要根据 JSON schema 生成 DDL
+
+            // 简化实现：如果 JSON 是纯 SQL，直接执行；否则抛出异常提示使用 Class 方式
+            if (describeJson.trim().toUpperCase().startsWith("CREATE TABLE")) {
+                jdbcTemplate.getJdbcTemplate().execute(describeJson);
+                return true;
+            } else {
+                throw new PgRepositoryException(
+                    "JSON-based table creation is not fully supported. " +
+                    "Please use createIndex(String index, Class<?> clazz) method instead."
+                );
+            }
+        } catch (PgRepositoryException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PgRepositoryException("Failed to create table '" + index + "' from JSON: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void deleteIndex(String index) {
-        // 未实现
+        // 检查配置是否允许删除索引（表）
+        if (!config.isEnableDeleteIndex()) {
+            throw new PgRepositoryException(
+                "Delete index is disabled. Please set 'pg.repository.enable-delete-index=true' to enable deleting tables."
+            );
+        }
+
+        if (index == null || index.trim().isEmpty()) {
+            throw new PgRepositoryException("Table name (index) cannot be null or empty");
+        }
+
+        try {
+            // 检查表是否存在
+            String checkSql = "SELECT EXISTS (" +
+                    "SELECT FROM information_schema.tables " +
+                    "WHERE table_schema = 'public' AND table_name = :tableName)";
+
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("tableName", index.trim());
+
+            Boolean exists = jdbcTemplate.queryForObject(checkSql, params, Boolean.class);
+
+            if (Boolean.TRUE.equals(exists)) {
+                // 执行 DROP TABLE 语句
+                String dropTableSql = "DROP TABLE IF EXISTS " + sqlBuilder.escapeIdentifier(index.trim()) + " CASCADE";
+                jdbcTemplate.getJdbcTemplate().execute(dropTableSql);
+            }
+        } catch (PgRepositoryException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PgRepositoryException("Failed to delete table '" + index + "': " + e.getMessage(), e);
+        }
     }
 
     @Override

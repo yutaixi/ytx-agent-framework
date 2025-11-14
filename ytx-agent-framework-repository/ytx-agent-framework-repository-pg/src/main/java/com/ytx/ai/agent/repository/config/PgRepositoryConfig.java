@@ -20,6 +20,18 @@ public class PgRepositoryConfig {
      */
     private String businessIdField = "bid";
 
+    /**
+     * 是否允许创建索引（表）
+     * 为防止意外创建表，默认为false
+     */
+    private boolean enableCreateIndex = false;
+
+    /**
+     * 是否允许删除索引（表）
+     * 为防止意外删除表，默认为false
+     */
+    private boolean enableDeleteIndex = false;
+
     public String getPrimaryKeyField() {
         return primaryKeyField;
     }
@@ -34,6 +46,22 @@ public class PgRepositoryConfig {
 
     public void setBusinessIdField(String businessIdField) {
         this.businessIdField = businessIdField;
+    }
+
+    public boolean isEnableCreateIndex() {
+        return enableCreateIndex;
+    }
+
+    public void setEnableCreateIndex(boolean enableCreateIndex) {
+        this.enableCreateIndex = enableCreateIndex;
+    }
+
+    public boolean isEnableDeleteIndex() {
+        return enableDeleteIndex;
+    }
+
+    public void setEnableDeleteIndex(boolean enableDeleteIndex) {
+        this.enableDeleteIndex = enableDeleteIndex;
     }
 }
 

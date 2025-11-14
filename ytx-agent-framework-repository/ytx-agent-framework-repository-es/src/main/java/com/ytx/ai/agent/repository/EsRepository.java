@@ -296,7 +296,46 @@ public class EsRepository<T extends Node> implements Repository<T> {
 
     @Override
     public boolean createIndex(String index, String describeJson) {
-        return false;
+        Preconditions.checkNotNull(index, "Index name cannot be null");
+        Preconditions.checkNotNull(describeJson, "Describe JSON cannot be null");
+
+        try {
+            // 解析 JSON 字符串
+            Map<String, Object> jsonMap = JSONUtil.parseObj(describeJson);
+
+            // 获取 IndexOperations
+            IndexOperations indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of(index));
+
+            // 检查索引是否已存在
+            if (indexOperations.exists()) {
+                return true; // 索引已存在，返回成功
+            }
+
+            // 提取 settings
+            if (jsonMap.containsKey("settings")) {
+                Object settingsObj = jsonMap.get("settings");
+                String settingsJson = JSONUtil.toJsonStr(settingsObj);
+                // 使用 Document 解析 settings JSON
+                Document settingsDocument = Document.parse(settingsJson);
+                // 创建索引（带 settings）
+                indexOperations.create(settingsDocument);
+            } else {
+                // 创建索引（不带 settings）
+                indexOperations.create();
+            }
+
+            // 提取并设置 mappings
+            if (jsonMap.containsKey("mappings")) {
+                Object mappingsObj = jsonMap.get("mappings");
+                String mappingsJson = JSONUtil.toJsonStr(mappingsObj);
+                Document mappingDocument = Document.parse(mappingsJson);
+                indexOperations.putMapping(mappingDocument);
+            }
+
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create index from JSON: " + e.getMessage(), e);
+        }
     }
 
     @Override
