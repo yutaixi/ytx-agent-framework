@@ -25,7 +25,6 @@ public class LlmConfig {
                 .init();
     }
 
-
     @Bean
     public LlmService llmService()
     {

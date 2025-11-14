@@ -27,17 +27,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
+        <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
         <dependency>
             <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-<!--            <version>3.34.1</version>-->
-            <version>3.49.0</version>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>3.51.0</version>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.8.29</version>
+            <version>5.8.40</version>
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>

@@ -7,7 +7,7 @@ import com.ytx.ai.workflow.execute.FlowContext;
 import com.ytx.ai.workflow.util.ValueUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 
 @Slf4j

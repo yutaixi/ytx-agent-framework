@@ -20,7 +20,7 @@ public class TestChatGpt {
         chatGPT = ChatGPT.builder()
                 .apiKey("sk-KTuxs7OcY7On67Cy9c646fD000D9422899F98325945c46D2")
                 .timeout(900)
-                .apiHost("http://192.168.31.125:3001/")
+                .apiHost("http://192.168.31.125:3000/")
                 .build()
                 .init();
     }
@@ -34,7 +34,7 @@ public class TestChatGpt {
         Message message = Message.of("写一段七言绝句诗，题目是：火锅！");
 
         ChatCompletion chatCompletion = ChatCompletion.builder()
-                .model(ChatCompletion.Model.GPT4o)
+                .model("gpt-5")
                 .messages(Arrays.asList(system, message))
                 .maxTokens(3000)
                 .temperature(0.7)
