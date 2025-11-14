@@ -1,7 +1,5 @@
 package com.ytx.ai.agent.repository.config;
 
-// language: java
-import com.ytx.ai.agent.repository.PgRepository;
 import com.ytx.ai.base.constants.RepositoryType;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -42,11 +40,6 @@ public class PostgresConfig {
     @Bean(name = "pgNamedParameterJdbcTemplate")
     public NamedParameterJdbcTemplate pgNamedParameterJdbcTemplate() {
         return new NamedParameterJdbcTemplate(pgDataSource());
-    }
-
-    @Bean
-    public PgRepository pgRepository(){
-        return new PgRepository();
     }
 
 }
