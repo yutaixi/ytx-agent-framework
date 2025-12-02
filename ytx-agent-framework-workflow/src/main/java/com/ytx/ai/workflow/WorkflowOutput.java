@@ -1,6 +1,5 @@
 package com.ytx.ai.workflow;
 
-import cn.hutool.core.annotation.Alias;
 import cn.hutool.core.annotation.PropIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;

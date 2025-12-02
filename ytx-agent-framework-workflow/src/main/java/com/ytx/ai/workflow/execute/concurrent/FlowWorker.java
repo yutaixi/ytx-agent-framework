@@ -124,10 +124,11 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
         context.addNodeOutput(node.getId(), nodeOutput);
 
         if (node.isEndNode()) {
+            //end节点的outputs变量输出到工作流输出中
+            workFlowOutput.setOutputs(nodeOutput.getData());
+            //end节点的answer变量输出到工作流输出中
             if(ObjectUtil.isNotEmpty(nodeOutput.getAnswer())){
                 workFlowOutput.setAnswer(nodeOutput.getAnswer());
-            }else{
-                workFlowOutput.setOutputs(nodeOutput.getData());
             }
         }
     }

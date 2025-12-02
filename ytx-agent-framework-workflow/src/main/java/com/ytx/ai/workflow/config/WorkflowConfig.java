@@ -41,11 +41,11 @@ public class WorkflowConfig {
     public ConditionPlugin conditionPlugin() {
         return new ConditionPlugin();
     }
-//
-//    @Bean
-//    public HttpPlugin httpPlugin() {
-//        return new HttpPlugin();
-//    }
+
+    @Bean
+    public HttpPlugin httpPlugin() {
+        return new HttpPlugin();
+    }
 
     @Bean
     public LlmPlugin llmPlugin() {

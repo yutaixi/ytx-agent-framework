@@ -249,10 +249,19 @@ public class ValueUtils {
             throw new RuntimeException(e);
         }
 
-        if(ObjectUtil.isEmpty(value) || ObjectUtil.isEmpty(value.toString())){
+        String orgValueContent;
+        if(value instanceof Value val){
+            orgValueContent= String.valueOf(val.getContent()) ;
+        }else if(value instanceof String valueStr){
+            orgValueContent=valueStr;
+        }else {
             return;
         }
-        AtomicReference<String> valueContent=new AtomicReference<>(value.toString());
+
+        if(ObjectUtil.isEmpty(orgValueContent) ){
+            return;
+        }
+        AtomicReference<String> valueContent=new AtomicReference<>(orgValueContent);
 
         // 找到变量
         List<String> variables = findReferenceVariable(valueContent.get());
@@ -271,7 +280,11 @@ public class ValueUtils {
         });
 
         try {
-            field.set(nodeMeta,valueContent.get());
+            if(value instanceof Value val){
+                val.setContent(valueContent.get());
+            }else if(value instanceof String valueStr){
+                field.set(nodeMeta,valueContent.get());
+            }
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
