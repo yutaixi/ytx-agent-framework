@@ -9,6 +9,8 @@ public enum WorkflowPluginTypeIdEnum {
     CONDITION( "condition",  "条件分支"),
     CODE( "code",  "编写代码，处理输入变量来生成返回值"),
     SUBPROCESS( "subProcess",  "子流程"),
+    BATCH( "batch",  "批量处理"),
+    BATCH_BODY( "batchBody",  "批量处理体"),
 
 
     AGENT_START("agentStart",  "启动智能体"),

@@ -5,7 +5,7 @@ import com.ytx.ai.base.agent.AgentMemory;
 import com.ytx.ai.base.agent.ChatDTO;
 import com.ytx.ai.base.agent.Command;
 import com.ytx.ai.base.agent.Skill;
-import com.ytx.ai.workflow.NodeOutput;
+import com.ytx.ai.workflow.NodeResult;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,13 +19,26 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Setter
 public class FlowContext {
 
+    private boolean strictMode = true;
     private ChatDTO chat;
-    private Map<String, NodeOutput> nodeOutputMap;
+    private Map<String, NodeResult> nodeOutputMap;
     private WorkflowWrapper workflowWrapper;
     private AgentMemory agentMemory;
     private Map<String, Skill> skillMap =new HashMap<>();
 
     private final List<Command> commands = new CopyOnWriteArrayList<>();
+
+
+    public static FlowContext of(FlowContext context) {
+        FlowContext flowContext = new FlowContext();
+        flowContext.setWorkflowWrapper(context.getWorkflowWrapper());
+        flowContext.setChat(context.getChat());
+        flowContext.setAgentMemory(context.getAgentMemory());
+        flowContext.setSkillMap(context.getSkillMap());
+        flowContext.setNodeOutputMap(context.getNodeOutputMap());
+        flowContext.setStrictMode(context.isStrictMode());
+        return flowContext;
+    }
 
     public static FlowContext of() {
         FlowContext flowContext = new FlowContext();
@@ -39,14 +52,14 @@ public class FlowContext {
         return flowContext;
     }
 
-    public void addNodeOutput(String nodeId, NodeOutput nodeOutput) {
+    public void addNodeOutput(String nodeId, NodeResult nodeResult) {
         if (nodeOutputMap == null) {
             nodeOutputMap = new ConcurrentHashMap<>();
         }
-        if (nodeOutput == null) {
-            nodeOutput = NodeOutput.builder().build();
+        if (nodeResult == null) {
+            nodeResult = NodeResult.builder().build();
         }
-        nodeOutputMap.put(nodeId, nodeOutput);
+        nodeOutputMap.put(nodeId, nodeResult);
     }
 
     public FlowContext chat(ChatDTO chat) {

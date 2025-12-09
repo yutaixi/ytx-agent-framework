@@ -2,8 +2,8 @@ package com.ytx.ai.workflow.config;
 
 import com.ytx.ai.workflow.execute.AgentTaskExecutor;
 import com.ytx.ai.workflow.execute.FlowExecutor;
-import com.ytx.ai.workflow.plugin.agent.*;
-import com.ytx.ai.workflow.plugin.flow.*;
+import com.ytx.ai.workflow.node.agent.*;
+import com.ytx.ai.workflow.node.internal.*;
 import com.ytx.ai.workflow.service.AgentChatService;
 import com.ytx.ai.workflow.service.AgentMemoryService;
 import org.springframework.context.annotation.Bean;
@@ -33,23 +33,34 @@ public class WorkflowConfig {
     }
 
     @Bean
-    public CodePlugin codePlugin() {
-        return new CodePlugin();
+    public CodeNode codePlugin() {
+        return new CodeNode();
     }
 //
     @Bean
-    public ConditionPlugin conditionPlugin() {
-        return new ConditionPlugin();
+    public ConditionNode conditionPlugin() {
+        return new ConditionNode();
     }
 
     @Bean
-    public HttpPlugin httpPlugin() {
-        return new HttpPlugin();
+    public HttpNode httpPlugin() {
+        return new HttpNode();
     }
 
     @Bean
-    public LlmPlugin llmPlugin() {
-        return new LlmPlugin();
+    public LlmNode llmPlugin() {
+        return new LlmNode();
+    }
+
+
+    @Bean
+    public BatchNode batchNode(){
+        return new BatchNode();
+    }
+
+    @Bean
+    public BatchBodyNode batchBodyNode(){
+        return new BatchBodyNode();
     }
 
     @Bean
@@ -64,40 +75,40 @@ public class WorkflowConfig {
 
 
     @Bean
-    public SubProcessPlugin subProcessPlugin() {
-        return new SubProcessPlugin();
+    public SubProcessNode subProcessPlugin() {
+        return new SubProcessNode();
     }
 
 
 
     @Bean
-    public AgentStartPlugin agentStartPlugin() {
-        return new AgentStartPlugin();
+    public AgentStartNode agentStartPlugin() {
+        return new AgentStartNode();
     }
 
     @Bean
-    public AgentIntentPlugin agentIntentPlugin() {
-        return new AgentIntentPlugin();
+    public AgentIntentNode agentIntentPlugin() {
+        return new AgentIntentNode();
     }
 
     @Bean
-    public AgentPlanPlugin agentPlanPlugin() {
-        return new AgentPlanPlugin();
+    public AgentPlanNode agentPlanPlugin() {
+        return new AgentPlanNode();
     }
 
     @Bean
-    public AgentExecutorPlugin agentExecutorPlugin() {
-        return new AgentExecutorPlugin();
+    public AgentExecutorNode agentExecutorPlugin() {
+        return new AgentExecutorNode();
     }
 
     @Bean
-    public AgentReplyPlugin agentReplyPlugin() {
-        return new AgentReplyPlugin();
+    public AgentReplyNode agentReplyPlugin() {
+        return new AgentReplyNode();
     }
 
     @Bean
-    public AgentEndPlugin agentEndPlugin() {
-        return new AgentEndPlugin();
+    public AgentEndNode agentEndPlugin() {
+        return new AgentEndNode();
     }
 
 

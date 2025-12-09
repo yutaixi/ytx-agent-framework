@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.flow;
+package com.ytx.ai.workflow.node.internal;
 
 
 import com.ytx.ai.workflow.FlowNode;
@@ -7,15 +7,15 @@ import com.ytx.ai.workflow.Value;
 import com.ytx.ai.workflow.annotation.StartNode;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
 
-public class FlowStart extends BasicPlugin {
+public class FlowStart extends BasicNode {
 
     private Map<String, Value> input;
 
@@ -29,8 +29,8 @@ public class FlowStart extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
-        return PluginOutput.of();
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+        return NodeOutput.of();
     }
 
     @Override

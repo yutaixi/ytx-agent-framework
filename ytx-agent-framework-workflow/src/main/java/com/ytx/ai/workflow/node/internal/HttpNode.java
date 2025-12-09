@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.flow;
+package com.ytx.ai.workflow.node.internal;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
@@ -9,8 +9,8 @@ import com.ytx.ai.workflow.annotation.DependsRef;
 import com.ytx.ai.workflow.annotation.DependsVariable;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import com.ytx.ai.workflow.tools.AuthHandler;
 import com.ytx.ai.workflow.tools.OAuth2TokenManager;
 import com.ytx.ai.workflow.util.ValueUtils;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * 负责执行 HTTP 请求
  */
 @Slf4j
-public class HttpPlugin extends BasicPlugin {
+public class HttpNode extends BasicNode {
 
     private static final int DEFAULT_TIMEOUT = 60;
 
@@ -44,7 +44,7 @@ public class HttpPlugin extends BasicPlugin {
     private final AuthHandler authHandler;
     private final HttpClient httpClient;
 
-    public HttpPlugin() {
+    public HttpNode() {
         this.oauth2TokenManager = new OAuth2TokenManager();
         this.authHandler = new AuthHandler(oauth2TokenManager);
         this.httpClient = HttpClient.newBuilder()
@@ -58,7 +58,7 @@ public class HttpPlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
         HttpPluginMeta meta = (HttpPluginMeta) flowNode.getMeta();
         try {
             // 解析嵌套的 Value 字段(HttpPlugin 特定逻辑)
@@ -74,7 +74,7 @@ public class HttpPlugin extends BasicPlugin {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             // 处理响应
-            PluginOutput output = handleResponse(response, meta.getOutputs());
+            NodeOutput output = handleResponse(response, meta.getOutputs());
 
             log.debug("HTTP request completed: nodeId={}, type={}, output={}", flowNode.getId(), getType(), JSONUtil.toJsonStr(output.getData()));
             return output;
@@ -87,8 +87,8 @@ public class HttpPlugin extends BasicPlugin {
     /**
      * 处理 HTTP 响应并转换为 PluginOutput
      */
-    public PluginOutput handleResponse(HttpResponse<String> response, List<Value> outputs) {
-        PluginOutput output = PluginOutput.of();
+    public NodeOutput handleResponse(HttpResponse<String> response, List<Value> outputs) {
+        NodeOutput output = NodeOutput.of();
         if (ObjectUtil.isEmpty(outputs)) {
             return output;
         }

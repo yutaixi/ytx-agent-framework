@@ -7,7 +7,13 @@ public enum ValueTypeEnum {
     BOOLEAN("boolean"),
     NUMBER("number"),
     TIME("time"),
-    OBJECT("object");
+    OBJECT("object"),
+    ARRAY_STRING("array[string]"),
+    ARRAY_INTEGER("array[integer]"),
+    ARRAY_BOOLEAN("array[boolean]"),
+    ARRAY_NUMBER("array[number]"),
+    ARRAY_TIME("array[time]"),
+    ARRAY_OBJECT("array[object]");
 
     private final String type;
 

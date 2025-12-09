@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin;
+package com.ytx.ai.workflow.node;
 
 import cn.hutool.core.date.StopWatch;
 import com.ytx.ai.workflow.FlowNode;
@@ -11,7 +11,7 @@ import jakarta.annotation.PostConstruct;
 import java.util.List;
 
 @Slf4j
-public abstract class BasicPlugin implements WorkflowPlugin {
+public abstract class BasicNode implements WorkflowNode {
 
     @PostConstruct
     public void initBean() {
@@ -46,7 +46,7 @@ public abstract class BasicPlugin implements WorkflowPlugin {
     }
 
     @Override
-    public PluginOutput run(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput run(FlowNode flowNode, FlowContext flowContext) {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
@@ -56,7 +56,7 @@ public abstract class BasicPlugin implements WorkflowPlugin {
         before(flowNode, flowContext);
 
         // 执行业务逻辑
-        PluginOutput response = doBiz(flowNode, flowContext);
+        NodeOutput response = doBiz(flowNode, flowContext);
 
         // 后置处理
         after(flowNode, response, flowContext);
@@ -74,7 +74,7 @@ public abstract class BasicPlugin implements WorkflowPlugin {
      * @param response
      * @param flowContext
      */
-    private void after(FlowNode flowNode, PluginOutput response, FlowContext flowContext) {
+    private void after(FlowNode flowNode, NodeOutput response, FlowContext flowContext) {
         response.setNodeMeta(flowNode.getMeta());
         ValueUtils.contractOutputs(flowNode.getMeta(),flowContext);
     }

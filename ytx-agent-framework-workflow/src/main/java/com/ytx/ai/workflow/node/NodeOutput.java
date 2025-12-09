@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin;
+package com.ytx.ai.workflow.node;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ytx.ai.workflow.NodeMeta;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class PluginOutput {
+public class NodeOutput {
 
     // 节点的输出值，对外使用
     private Map<String, Value> data;
@@ -21,10 +21,10 @@ public class PluginOutput {
     // 对话类流程，输出文字结果
     private String answer;
 
-    public static PluginOutput of() {
-        PluginOutput pluginOutput = new PluginOutput();
-        pluginOutput.setData(new HashMap<>());
-        return pluginOutput;
+    public static NodeOutput of() {
+        NodeOutput nodeOutput = new NodeOutput();
+        nodeOutput.setData(new HashMap<>());
+        return nodeOutput;
     }
 
     public void addData(String name, Value value) {

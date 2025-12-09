@@ -1,16 +1,16 @@
-package com.ytx.ai.workflow.plugin.agent;
+package com.ytx.ai.workflow.node.agent;
 
 import com.ytx.ai.workflow.FlowNode;
 import com.ytx.ai.workflow.NodeMeta;
 import com.ytx.ai.workflow.annotation.EndNode;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import lombok.Getter;
 import lombok.Setter;
 
-public class AgentEndPlugin extends BasicPlugin {
+public class AgentEndNode extends BasicNode {
     @Override
     public void init() {
 
@@ -22,9 +22,9 @@ public class AgentEndPlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
         System.out.println("AgentEndPlugin.doBiz");
-        return PluginOutput.of();
+        return NodeOutput.of();
     }
 
     @Override

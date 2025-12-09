@@ -8,17 +8,14 @@ import com.jd.platform.async.executor.Async;
 import com.jd.platform.async.worker.DependWrapper;
 import com.jd.platform.async.wrapper.WorkerWrapper;
 import com.ytx.ai.workflow.FlowNode;
-import com.ytx.ai.workflow.NodeOutput;
+import com.ytx.ai.workflow.NodeResult;
 import com.ytx.ai.workflow.Workflow;
 import com.ytx.ai.workflow.WorkflowOutput;
 import com.ytx.ai.workflow.execute.concurrent.FlowWorker;
 import com.ytx.ai.workflow.execute.concurrent.FlowWorkerParam;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,15 +40,10 @@ public class FlowExecutor {
         }
 
         // 处理context，入参为空则新建
-        FlowContext finalContext;
-        if (context == null) {
-            finalContext = FlowContext.of();
-        } else {
-            finalContext = context;
-        }
+        FlowContext finalContext= Objects.requireNonNullElseGet(context, FlowContext::of);
 
         // 新流程包装类，方便后续使用
-        WorkflowWrapper workFlowWrapper = new WorkflowWrapper(workFlow);
+        WorkflowWrapper workFlowWrapper = new WorkflowWrapper(workFlow,finalContext.isStrictMode());
         finalContext.setWorkflowWrapper(workFlowWrapper);
 
         // worker Map
@@ -68,7 +60,7 @@ public class FlowExecutor {
 
             // 工作处理类
             FlowWorker flowWorker = new FlowWorker();
-            WorkerWrapper<FlowWorkerParam, NodeOutput> workerWrapper = new WorkerWrapper.Builder<FlowWorkerParam, NodeOutput>()
+            WorkerWrapper<FlowWorkerParam, NodeResult> workerWrapper = new WorkerWrapper.Builder<FlowWorkerParam, NodeResult>()
                     .worker(flowWorker)
                     .param(flowWorkerParam)
                     .callback(flowWorker)
@@ -121,12 +113,15 @@ public class FlowExecutor {
 
     private void summary(WorkflowOutput workflowOutput, FlowContext context, WorkflowWrapper workflowWrapper, long costTotal) {
         Workflow workflow = workflowWrapper.getWorkflow();
-        Map<String, NodeOutput> outputMap = context.getNodeOutputMap();
+        Map<String, NodeResult> outputMap = context.getNodeOutputMap();
         StringBuilder costSummary = new StringBuilder(workflow.getName() + " cost summary:");
 
         if (ObjectUtil.isNotEmpty(outputMap)) {
             outputMap.forEach((id, output) -> {
                 FlowNode node = workflowWrapper.getNode(id);
+                if(ObjectUtil.isEmpty(node)){
+                    return;
+                }
                 costSummary.append("\nnode id:")
                         .append(id).append(", node name:")
                         .append(node.getLabel())

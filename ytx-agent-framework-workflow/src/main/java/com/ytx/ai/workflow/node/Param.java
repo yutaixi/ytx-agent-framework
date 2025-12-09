@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin;
+package com.ytx.ai.workflow.node;
 
 import com.ytx.ai.workflow.enums.ValueTypeEnum;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.flow;
+package com.ytx.ai.workflow.node.internal;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ytx.ai.sandbox.Args;
@@ -10,14 +10,14 @@ import com.ytx.ai.workflow.Value;
 import com.ytx.ai.workflow.annotation.DependsRef;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 
-public class CodePlugin extends BasicPlugin {
+public class CodeNode extends BasicNode {
 
     @Override
     public String getType() {
@@ -25,7 +25,7 @@ public class CodePlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
         CodeNodeMeta codeNodeMeta=(CodeNodeMeta)flowNode.getMeta();
         String language=codeNodeMeta.getLanguage();
         if("javascript".equalsIgnoreCase(language)){
@@ -52,7 +52,7 @@ public class CodePlugin extends BasicPlugin {
             });
         }
 
-        PluginOutput output = PluginOutput.of();
+        NodeOutput output = NodeOutput.of();
 
         return output;
     }

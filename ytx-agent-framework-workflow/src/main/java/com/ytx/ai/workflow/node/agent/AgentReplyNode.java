@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.agent;
+package com.ytx.ai.workflow.node.agent;
 
 import cn.hutool.json.JSONUtil;
 import com.ytx.ai.agent.llm.service.LlmService;
@@ -14,15 +14,15 @@ import com.ytx.ai.workflow.annotation.DependsVariable;
 import com.ytx.ai.workflow.annotation.ExpandInputs;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class AgentReplyPlugin extends BasicPlugin {
+public class AgentReplyNode extends BasicNode {
 
     @Autowired
     private LlmService llmService;
@@ -46,7 +46,7 @@ public class AgentReplyPlugin extends BasicPlugin {
             %s""";
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
         System.out.println("AgentReplyPlugin.doBiz");
         AgentReplyNodeMeta meta = (AgentReplyNodeMeta) flowNode.getMeta();
         ChatDTO chat = flowContext.getChat();
@@ -62,7 +62,7 @@ public class AgentReplyPlugin extends BasicPlugin {
 
         String llmResponse=llmService.chatCompletion(chatCompletion);
         meta.setReply(llmResponse);
-        return PluginOutput.of();
+        return NodeOutput.of();
     }
 
     private String formatUserPrompt(ChatDTO chat,PlannedTasks taskResult){

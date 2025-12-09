@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.flow;
+package com.ytx.ai.workflow.node.internal;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ytx.ai.workflow.FlowNode;
@@ -9,15 +9,15 @@ import com.ytx.ai.workflow.annotation.DependsVariable;
 import com.ytx.ai.workflow.annotation.EndNode;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import com.ytx.ai.workflow.util.ValueUtils;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 
-public class FlowEnd extends BasicPlugin {
+public class FlowEnd extends BasicNode {
 
 
     @Override
@@ -30,11 +30,11 @@ public class FlowEnd extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
 
         EndNodeMeta nodeMeta= (EndNodeMeta) flowNode.getMeta();
 
-        PluginOutput output = PluginOutput.of();
+        NodeOutput output = NodeOutput.of();
         output.setData(ValueUtils.toMap(nodeMeta.getOutputs()));
         String outputText=nodeMeta.getOutputText();
         if(ObjectUtil.isNotEmpty(outputText)){

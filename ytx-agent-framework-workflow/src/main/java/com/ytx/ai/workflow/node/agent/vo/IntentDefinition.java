@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.agent.vo;
+package com.ytx.ai.workflow.node.agent.vo;
 
 import lombok.Getter;
 import lombok.Setter;

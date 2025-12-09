@@ -1,6 +1,5 @@
-package com.ytx.ai.workflow.plugin.agent;
+package com.ytx.ai.workflow.node.agent;
 
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.json.JSONUtil;
 import com.ytx.ai.agent.llm.service.LlmService;
 import com.ytx.ai.agent.llm.vo.LlmChatCompletion;
@@ -15,18 +14,17 @@ import com.ytx.ai.workflow.annotation.DependsRef;
 import com.ytx.ai.workflow.annotation.DependsVariable;
 import com.ytx.ai.workflow.annotation.ExpandInputs;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
-import com.ytx.ai.workflow.enums.ValueTypeEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
-import com.ytx.ai.workflow.plugin.agent.vo.IntentDefinition;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
+import com.ytx.ai.workflow.node.agent.vo.IntentDefinition;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class AgentIntentPlugin extends BasicPlugin {
+public class AgentIntentNode extends BasicNode {
 
     @Autowired
     private LlmService llmService;
@@ -42,7 +40,7 @@ public class AgentIntentPlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
         System.out.println("AgentIntentPlugin.doBiz");
         AgentIntentNodeMeta meta = (AgentIntentNodeMeta) flowNode.getMeta();
         ChatDTO chat=meta.getUserInput();
@@ -58,7 +56,7 @@ public class AgentIntentPlugin extends BasicPlugin {
         System.out.println(llmResponse);
         UserIntention userIntention= JSONUtil.toBean(llmResponse,UserIntention.class);
         meta.setUserIntent(userIntention);
-        return PluginOutput.of();
+        return NodeOutput.of();
     }
 
     private String formatSystemPrompt(AgentIntentNodeMeta meta){

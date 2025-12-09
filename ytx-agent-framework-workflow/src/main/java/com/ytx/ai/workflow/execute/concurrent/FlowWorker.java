@@ -13,8 +13,8 @@ import com.ytx.ai.workflow.*;
 import com.ytx.ai.workflow.execute.FlowContext;
 import com.ytx.ai.workflow.execute.FlowExecutor;
 import com.ytx.ai.workflow.execute.WorkflowWrapper;
-import com.ytx.ai.workflow.plugin.WorkflowPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.WorkflowNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import com.ytx.ai.workflow.register.WorkflowPluginRegister;
 import com.ytx.ai.workflow.util.ValueUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 @Slf4j
-public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallback<FlowWorkerParam, NodeOutput> {
+public class FlowWorker implements IWorker<FlowWorkerParam, NodeResult>, ICallback<FlowWorkerParam, NodeResult> {
 
     @Override
     public void begin() {
@@ -32,7 +33,7 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
     }
 
     @Override
-    public NodeOutput action(FlowWorkerParam flowWorkerParam, Map<String, WorkerWrapper> map) {
+    public NodeResult action(FlowWorkerParam flowWorkerParam, Map<String, WorkerWrapper> map) {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
@@ -41,7 +42,7 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
             return null;
         }
 
-        NodeOutput output = NodeOutput.builder().build();
+        NodeResult output = NodeResult.builder().build();
 
         // 如果该条件不满足，或者父节点全部跳过，则跳过当前节点
         if (needSkipNode(flowNode, flowWorkerParam.getFlowContext())) {
@@ -89,11 +90,11 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
             // 插件类型，默认认为插件
             case plugin:
             default: {
-                WorkflowPlugin workflowPlugin = WorkflowPluginRegister.get(flowNode.getComponentId());
-                PluginOutput pluginOutput = workflowPlugin.run(flowWorkerParam.getFlowNode(), flowWorkerParam.getFlowContext());
-                output.setData(pluginOutput.getData());
-                output.setNodeMeta(pluginOutput.getNodeMeta());
-                output.setAnswer(pluginOutput.getAnswer());
+                WorkflowNode workflowNode = WorkflowPluginRegister.get(flowNode.getComponentId());
+                NodeOutput nodeOutput = workflowNode.run(flowWorkerParam.getFlowNode(), flowWorkerParam.getFlowContext());
+                output.setData(nodeOutput.getData());
+                output.setNodeMeta(nodeOutput.getNodeMeta());
+                output.setAnswer(nodeOutput.getAnswer());
                 break;
             }
         }
@@ -106,29 +107,29 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
     }
 
     @Override
-    public NodeOutput defaultValue() {
+    public NodeResult defaultValue() {
         return null;
     }
 
     @Override
-    public void result(boolean success, FlowWorkerParam flowWorkerParam, WorkResult<NodeOutput> workResult) {
+    public void result(boolean success, FlowWorkerParam flowWorkerParam, WorkResult<NodeResult> workResult) {
         if (!success) {
             log.error("run failed", workResult.getEx());
         }
 
         WorkflowOutput workFlowOutput = flowWorkerParam.getWorkflowOutput();
         FlowNode node = flowWorkerParam.getFlowNode();
-        NodeOutput nodeOutput = workResult.getResult();
+        NodeResult nodeResult = workResult.getResult();
 
         FlowContext context = flowWorkerParam.getFlowContext();
-        context.addNodeOutput(node.getId(), nodeOutput);
+        context.addNodeOutput(node.getId(), nodeResult);
 
         if (node.isEndNode()) {
             //end节点的outputs变量输出到工作流输出中
-            workFlowOutput.setOutputs(nodeOutput.getData());
+            workFlowOutput.setOutputs(nodeResult.getData());
             //end节点的answer变量输出到工作流输出中
-            if(ObjectUtil.isNotEmpty(nodeOutput.getAnswer())){
-                workFlowOutput.setAnswer(nodeOutput.getAnswer());
+            if(ObjectUtil.isNotEmpty(nodeResult.getAnswer())){
+                workFlowOutput.setAnswer(nodeResult.getAnswer());
             }
         }
     }
@@ -141,7 +142,7 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
         }
         List<FlowNode> parentNodes = workFlowWrapper.getParentNodes(flowNode.getId());
         // 所有前置节点执行结果
-        Map<String, NodeOutput> nodeOutputMap = flowContext.getNodeOutputMap();
+        Map<String, NodeResult> nodeOutputMap = flowContext.getNodeOutputMap();
         // 如果所有父节点都跳过，则跳过当前节点
         AtomicBoolean parentNodeAllSkip = new AtomicBoolean(true);
         if (ObjectUtil.isNotEmpty(parentNodes) && ObjectUtil.isNotEmpty(nodeOutputMap)) {
@@ -153,6 +154,8 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
                     .forEach(parentNode -> {
                         parentNodeAllSkip.set(parentNodeAllSkip.get() && parentNode.isSkip());
                     });
+        }else{
+            parentNodeAllSkip.set(false);
         }
         if (parentNodeAllSkip.get()) {
             log.debug("node {} all parent node skipped.", flowNode.getLabel());
@@ -162,27 +165,28 @@ public class FlowWorker implements IWorker<FlowWorkerParam, NodeOutput>, ICallba
         List<FlowEdge> incomingEdges = workFlowWrapper.getIncomingEdges(flowNode.getId());
         if (ObjectUtil.isNotEmpty(incomingEdges)) {
             AtomicBoolean anyEdgeConditionsMeet = new AtomicBoolean(false);
-            incomingEdges.stream()
-                    // .filter(edge -> {
-                    //     return ObjectUtil.isNotEmpty(edge.getDepends());
-                    // })
+            List<FlowEdge> edgesToProcess = incomingEdges.stream()
                     .filter(edge -> {
-                        NodeOutput parentNodeOutput = nodeOutputMap.get(edge.getSource());
-                        return parentNodeOutput != null && !parentNodeOutput.isSkip();
-                    })
-                    .forEach(edge -> {
-                        NodeOutput parentNodeOutput = nodeOutputMap.get(edge.getSource());
-                        if (ObjectUtil.isNotEmpty(edge.getDepends())) {
-                            Value dependsValue = parentNodeOutput.getData().get(edge.getDepends());
-                            if (dependsValue == null || ObjectUtil.isEmpty(dependsValue.getContent())) {
-                                return;
-                            }
-                            anyEdgeConditionsMeet.set(anyEdgeConditionsMeet.get() ||
-                                    Boolean.parseBoolean(dependsValue.getContent().toString()));
-                        } else {
-                            anyEdgeConditionsMeet.set(true);
-                        }
-                    });
+                        NodeResult parentNodeResult = nodeOutputMap.get(edge.getSource());
+                        return parentNodeResult != null && !parentNodeResult.isSkip();
+                    }).collect(Collectors.toList());
+            if (ObjectUtil.isEmpty(edgesToProcess)) {
+                return false;
+            }
+
+            edgesToProcess.forEach(edge -> {
+                NodeResult parentNodeResult = nodeOutputMap.get(edge.getSource());
+                if (ObjectUtil.isNotEmpty(edge.getDepends())) {
+                    Value dependsValue = parentNodeResult.getData().get(edge.getDepends());
+                    if (dependsValue == null || ObjectUtil.isEmpty(dependsValue.getContent())) {
+                        return;
+                    }
+                    anyEdgeConditionsMeet.set(anyEdgeConditionsMeet.get() ||
+                            Boolean.parseBoolean(dependsValue.getContent().toString()));
+                } else {
+                    anyEdgeConditionsMeet.set(true);
+                }
+            });
 
             if (!anyEdgeConditionsMeet.get()) {
                 log.debug("node {} skipped not meet all conditions.", flowNode.getLabel());

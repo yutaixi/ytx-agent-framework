@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.agent;
+package com.ytx.ai.workflow.node.agent;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ytx.ai.workflow.FlowNode;
@@ -7,14 +7,14 @@ import com.ytx.ai.workflow.Value;
 import com.ytx.ai.workflow.annotation.StartNode;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 
-public class AgentStartPlugin extends BasicPlugin {
+public class AgentStartNode extends BasicNode {
     @Override
     public void init() {
 
@@ -26,7 +26,7 @@ public class AgentStartPlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
         System.out.println("AgentStartPlugin.doBiz");
         AgentStartNodeMeta meta = (AgentStartNodeMeta) flowNode.getMeta();
         if(ObjectUtil.isNotEmpty(meta.getInputs())){
@@ -34,7 +34,7 @@ public class AgentStartPlugin extends BasicPlugin {
                 input.setContent(flowContext.getChat());
             });
         }
-        return PluginOutput.of();
+        return NodeOutput.of();
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.ytx.ai.workflow.util;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ytx.ai.workflow.NodeMeta;
-import com.ytx.ai.workflow.NodeOutput;
+import com.ytx.ai.workflow.NodeResult;
 import com.ytx.ai.workflow.Value;
 import com.ytx.ai.workflow.ValueSource;
 import com.ytx.ai.workflow.enums.SystemVariableEnum;
@@ -39,6 +39,12 @@ public class ValueUtils {
             case BOOLEAN:
             case OBJECT:
             case INTEGER:
+            case ARRAY_STRING:
+            case ARRAY_BOOLEAN:
+            case ARRAY_NUMBER:
+            case ARRAY_INTEGER:
+            case ARRAY_TIME:
+            case ARRAY_OBJECT:
                 result = (T) value.getContent();
                 break;
 
@@ -64,6 +70,28 @@ public class ValueUtils {
         }
         if(value instanceof Date){
             return ValueTypeEnum.TIME.getType();
+        }
+        if(value instanceof Collection<?> collection){
+            if(collection.isEmpty()){
+                return ValueTypeEnum.ARRAY_STRING.getType();
+            }
+            Object firstItem=collection.iterator().next();
+            if(firstItem instanceof String){
+                return ValueTypeEnum.ARRAY_STRING.getType();
+            }
+            if(firstItem instanceof Integer){
+                return ValueTypeEnum.ARRAY_INTEGER.getType();
+            }
+            if(firstItem instanceof Boolean){
+                return ValueTypeEnum.ARRAY_BOOLEAN.getType();
+            }
+            if(firstItem instanceof Number){
+                return ValueTypeEnum.ARRAY_NUMBER.getType();
+            }
+            if(firstItem instanceof Date){
+                return ValueTypeEnum.ARRAY_TIME.getType();
+            }
+            return ValueTypeEnum.ARRAY_STRING.getType();
         }
         return ValueTypeEnum.OBJECT.getType();
     }
@@ -138,12 +166,12 @@ public class ValueUtils {
         // 参数值引用其他节点
         ValueSource valueSource = value.getSource();
         if (valueSource != null && ValueSourceTypeEnum.isReference(valueSource.getType())) {
-            NodeOutput refNodeOutput = flowContext.getNodeOutputMap().get(valueSource.getNId());
-            if (refNodeOutput == null || ObjectUtil.isEmpty(refNodeOutput.getNodeMeta())) {
+            NodeResult refNodeResult = flowContext.getNodeOutputMap().get(valueSource.getNId());
+            if (refNodeResult == null || ObjectUtil.isEmpty(refNodeResult.getNodeMeta())) {
                 return;
             }
 
-            NodeMeta nodeMeta=refNodeOutput.getNodeMeta();
+            NodeMeta nodeMeta= refNodeResult.getNodeMeta();
             Value refValue = NodeReflectUtils.getValue(nodeMeta,valueSource.getVName(),valueSource.getVGroup());
             if (ObjectUtil.isEmpty(refValue)) {
                 return;

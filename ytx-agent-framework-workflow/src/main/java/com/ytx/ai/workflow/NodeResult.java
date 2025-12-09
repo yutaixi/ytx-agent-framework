@@ -9,7 +9,7 @@ import java.util.Map;
 @Getter
 @Setter
 @Builder
-public class NodeOutput {
+public class NodeResult {
     private Map<String, Value> data;
     private NodeMeta nodeMeta;
     private String answer;

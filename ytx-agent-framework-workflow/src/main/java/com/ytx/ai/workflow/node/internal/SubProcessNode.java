@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.flow;
+package com.ytx.ai.workflow.node.internal;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -13,15 +13,15 @@ import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
 import com.ytx.ai.workflow.execute.FlowExecutor;
 import com.ytx.ai.workflow.execute.WorkflowWrapper;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class SubProcessPlugin extends BasicPlugin {
+public class SubProcessNode extends BasicNode {
 
 
     @Autowired
@@ -38,7 +38,7 @@ public class SubProcessPlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
         SubProcessNodeMeta subProcessNodeMeta = (SubProcessNodeMeta)flowNode.getMeta();
         String flowIdStr=subProcessNodeMeta.getProcessId();
         WorkflowWrapper workflowWrapper=null;
@@ -64,9 +64,9 @@ public class SubProcessPlugin extends BasicPlugin {
         FlowEnd.EndNodeMeta endNodeMeta=(FlowEnd.EndNodeMeta) endNode.getMeta();
         subProcessNodeMeta.setOutputs(endNodeMeta.getOutputs());
         subProcessNodeMeta.setOutputText(endNodeMeta.getOutputText());
-        PluginOutput subProcessPluginOutput = PluginOutput.of();
-        subProcessPluginOutput.setAnswer(endNodeMeta.getOutputText());
-        return subProcessPluginOutput;
+        NodeOutput subProcessNodeOutput = NodeOutput.of();
+        subProcessNodeOutput.setAnswer(endNodeMeta.getOutputText());
+        return subProcessNodeOutput;
     }
 
     @Override

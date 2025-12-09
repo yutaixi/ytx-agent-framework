@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.flow;
+package com.ytx.ai.workflow.node.internal;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ytx.ai.workflow.FlowNode;
@@ -9,8 +9,8 @@ import com.ytx.ai.workflow.enums.ConditionOptEnum;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.enums.ValueTypeEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import com.ytx.ai.workflow.util.ValueUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ConditionPlugin extends BasicPlugin {
+public class ConditionNode extends BasicNode {
 
     @Getter
     @Setter
@@ -43,7 +43,7 @@ public class ConditionPlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
 
         ConditionNodeMeta conditionNodeMeta=(ConditionNodeMeta)flowNode.getMeta();
 
@@ -65,7 +65,7 @@ public class ConditionPlugin extends BasicPlugin {
             }
         });
 
-        PluginOutput output = PluginOutput.of();
+        NodeOutput output = NodeOutput.of();
         finalLogicBranches.forEach(group -> {
             output.addData(group.getId(),
                     Value.builder()

@@ -73,6 +73,7 @@ public class ChatGptService implements LlmService {
         messages.add(Message.of(llmChatCompletion.getUserPrompt().toString()));
 
         ChatCompletion chatCompletion=ChatCompletion.builder()
+                .model(llmChatCompletion.getModel())
                 .messages(messages)
                 .temperature(llmChatCompletion.getTemperature())
                 .build();

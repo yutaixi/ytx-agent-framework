@@ -39,16 +39,21 @@ public class WorkflowWrapper {
 
     public WorkflowWrapper(Workflow workflow) {
         this.workflow = workflow;
-        this.analyze();
+        this.analyze(true);
+    }
+
+    public WorkflowWrapper(Workflow workflow,Boolean strictMode) {
+        this.workflow = workflow;
+        this.analyze(strictMode);
     }
 
     // 分析整个流程，解析出需要的数据
-    private void analyze() {
-        analyzeNodes(workflow.getNodes());
+    private void analyze(Boolean strictMode) {
+        analyzeNodes(workflow.getNodes(),strictMode);
         analyzeEdges(workflow.getEdges());
     }
 
-    private void analyzeNodes(List<FlowNode> nodes) {
+    private void analyzeNodes(List<FlowNode> nodes,Boolean strictMode) {
         if (ObjectUtil.isEmpty(nodes)) {
             return;
         }
@@ -64,6 +69,11 @@ public class WorkflowWrapper {
                 endNodes.add(node);
             }
         });
+
+
+        if(ObjectUtil.isNotEmpty(strictMode) &&!strictMode){
+            return;
+        }
 
         if (ObjectUtil.isEmpty(startNodes)) {
             throw new RuntimeException("Workflow " + workflow.getName() + " missing start node. Fix it before running.");

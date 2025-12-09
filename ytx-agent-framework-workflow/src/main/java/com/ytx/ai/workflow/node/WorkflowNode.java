@@ -1,16 +1,16 @@
-package com.ytx.ai.workflow.plugin;
+package com.ytx.ai.workflow.node;
 
 import com.ytx.ai.workflow.FlowNode;
 import com.ytx.ai.workflow.NodeMeta;
 import com.ytx.ai.workflow.execute.FlowContext;
 
-public interface WorkflowPlugin {
+public interface WorkflowNode {
 
     public String getType();
 
-    public PluginOutput run(FlowNode flowNode, FlowContext flowContext);
+    public NodeOutput run(FlowNode flowNode, FlowContext flowContext);
 
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext);
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext);
 
     public Class<? extends NodeMeta> getMetaClass();
 }

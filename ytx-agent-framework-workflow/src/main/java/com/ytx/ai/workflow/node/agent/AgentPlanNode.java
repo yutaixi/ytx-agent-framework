@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.agent;
+package com.ytx.ai.workflow.node.agent;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -9,7 +9,6 @@ import com.ytx.ai.agent.llm.vo.LlmChatCompletion;
 import com.ytx.ai.agent.service.SkillService;
 import com.ytx.ai.base.agent.*;
 import com.ytx.ai.workflow.*;
-import com.ytx.ai.workflow.adaptor.WorkflowAdaptor;
 import com.ytx.ai.workflow.annotation.ContractOutputs;
 import com.ytx.ai.workflow.annotation.DependsRef;
 import com.ytx.ai.workflow.annotation.DependsVariable;
@@ -17,8 +16,8 @@ import com.ytx.ai.workflow.annotation.ExpandInputs;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
 import com.ytx.ai.workflow.execute.WorkflowWrapper;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 
-public class AgentPlanPlugin extends BasicPlugin {
+public class AgentPlanNode extends BasicNode {
 
     @Autowired
     private LlmService llmService;
@@ -45,7 +44,7 @@ public class AgentPlanPlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
         System.out.println("AgentPlanPlugin.doBiz");
         AgentPlanNodeMeta meta = (AgentPlanNodeMeta) flowNode.getMeta();
 
@@ -63,7 +62,7 @@ public class AgentPlanPlugin extends BasicPlugin {
             task.setExecute_order(1);
             tasks.setTasks(ListUtil.toList(task));
             meta.setPlannedTasks(tasks);
-            return PluginOutput.of();
+            return NodeOutput.of();
         }else{
 
         }
@@ -78,7 +77,7 @@ public class AgentPlanPlugin extends BasicPlugin {
         System.out.println("llmResponse:"+llmResponse);
         PlannedTasks tasks= JSONUtil.toBean(llmResponse, PlannedTasks.class);
         meta.setPlannedTasks(tasks);
-        return PluginOutput.of();
+        return NodeOutput.of();
     }
 
     private String formatSystemPrompt(String systemPrompt,Map<String, Skill> skillMap){

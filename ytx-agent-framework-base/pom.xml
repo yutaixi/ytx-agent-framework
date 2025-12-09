@@ -46,11 +46,10 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>com.ytx.ai</groupId>
-            <artifactId>ytx-agent-framework-llm</artifactId>
-            <version>${revision}</version>
+            <groupId>com.github.plexpt</groupId>
+            <artifactId>chatgpt</artifactId>
+            <version>5.1.1</version>
         </dependency>
 
         <dependency>

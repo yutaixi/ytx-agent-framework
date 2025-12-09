@@ -1,4 +1,4 @@
-package com.ytx.ai.workflow.plugin.flow;
+package com.ytx.ai.workflow.node.internal;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.plexpt.chatgpt.entity.chat.ResponseFormat;
@@ -11,15 +11,15 @@ import com.ytx.ai.workflow.annotation.DependsRef;
 import com.ytx.ai.workflow.annotation.DependsVariable;
 import com.ytx.ai.workflow.enums.WorkflowPluginTypeIdEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
-import com.ytx.ai.workflow.plugin.BasicPlugin;
-import com.ytx.ai.workflow.plugin.PluginOutput;
+import com.ytx.ai.workflow.node.BasicNode;
+import com.ytx.ai.workflow.node.NodeOutput;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class LlmPlugin extends BasicPlugin {
+public class LlmNode extends BasicNode {
 
     @Autowired
     private LlmService llmService;
@@ -34,7 +34,7 @@ public class LlmPlugin extends BasicPlugin {
     }
 
     @Override
-    public PluginOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
+    public NodeOutput doBiz(FlowNode flowNode, FlowContext flowContext) {
 
         LlmNodeMeta nodeMeta=(LlmNodeMeta)flowNode.getMeta();
         // 用户提示词
@@ -54,7 +54,7 @@ public class LlmPlugin extends BasicPlugin {
         String content = llmService.chatCompletion(llmChatCompletion);
         Value outputValue=nodeMeta.getOutputs().getFirst();
         outputValue.setContent(content);
-        return PluginOutput.of();
+        return NodeOutput.of();
     }
 
     @Override
