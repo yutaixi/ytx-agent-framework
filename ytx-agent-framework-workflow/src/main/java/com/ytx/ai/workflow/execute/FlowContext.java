@@ -31,11 +31,14 @@ public class FlowContext {
 
     public static FlowContext of(FlowContext context) {
         FlowContext flowContext = new FlowContext();
-        flowContext.setWorkflowWrapper(context.getWorkflowWrapper());
         flowContext.setChat(context.getChat());
         flowContext.setAgentMemory(context.getAgentMemory());
         flowContext.setSkillMap(context.getSkillMap());
-        flowContext.setNodeOutputMap(context.getNodeOutputMap());
+        Map<String,NodeResult> outputMap=context.getNodeOutputMap();
+        if(ObjectUtil.isNotEmpty(outputMap)){
+            Map<String,NodeResult> newMap=new ConcurrentHashMap<>(outputMap);
+            flowContext.setNodeOutputMap(newMap);
+        }
         flowContext.setStrictMode(context.isStrictMode());
         return flowContext;
     }

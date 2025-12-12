@@ -57,5 +57,18 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <!-- Guava 工具库，用于 Streams.mapWithIndex 等流操作 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.5.0-jre</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>5.6.2</version>
+        </dependency>
+
     </dependencies>
 </project>
