@@ -19,6 +19,8 @@ public class SkillEntity implements Flow {
     private String name;
     private String description;
     private String type;
+    private String icon;
     private String definition;
     private Integer ver;
 }
+
