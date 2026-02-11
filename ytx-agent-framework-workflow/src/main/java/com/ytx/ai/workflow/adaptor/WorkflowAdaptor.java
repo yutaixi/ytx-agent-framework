@@ -8,6 +8,7 @@ import cn.hutool.json.JSONUtil;
 import com.ytx.ai.agent.entity.SkillEntity;
 import com.ytx.ai.base.workflow.Flow;
 import com.ytx.ai.workflow.*;
+import com.ytx.ai.workflow.adaptor.processor.AlignStreamModePostProcessor;
 import com.ytx.ai.workflow.adaptor.processor.BatchNodeParsePostProcessor;
 import com.ytx.ai.workflow.adaptor.processor.WorkflowParsePostProcessor;
 import com.ytx.ai.workflow.enums.ComponentTypeEnum;
@@ -35,6 +36,7 @@ public class WorkflowAdaptor {
      */
     static {
         postProcessors.add(new BatchNodeParsePostProcessor());
+        postProcessors.add(new AlignStreamModePostProcessor());
     }
 
 

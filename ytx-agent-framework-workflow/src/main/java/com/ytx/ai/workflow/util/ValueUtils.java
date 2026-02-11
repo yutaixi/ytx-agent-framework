@@ -1,6 +1,10 @@
 package com.ytx.ai.workflow.util;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.ytx.ai.workflow.NodeMeta;
 import com.ytx.ai.workflow.NodeResult;
 import com.ytx.ai.workflow.Value;
@@ -10,6 +14,7 @@ import com.ytx.ai.workflow.enums.ValueSourceTypeEnum;
 import com.ytx.ai.workflow.enums.ValueTypeEnum;
 import com.ytx.ai.workflow.execute.FlowContext;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,7 +38,6 @@ public class ValueUtils {
             case NUMBER:
                 result = (T) Double.valueOf(value.getContent().toString());
                 break;
-
             case STRING:
             case TIME:
             case BOOLEAN:
@@ -171,14 +175,36 @@ public class ValueUtils {
                 return;
             }
 
-            NodeMeta nodeMeta= refNodeResult.getNodeMeta();
-            Value refValue = NodeReflectUtils.getValue(nodeMeta,valueSource.getVName(),valueSource.getVGroup());
+            NodeMeta nodeMeta = refNodeResult.getNodeMeta();
+
+            String vName = valueSource.getVName();
+            String path = null;
+
+            // 处理嵌套引用：检查变量名是否包含点号，如 "user.name"
+            if (StrUtil.isNotEmpty(vName) && vName.contains(".")) {
+                int firstDotIndex = vName.indexOf(".");
+                // 截取根变量名，如 "user"
+                String rootName = vName.substring(0, firstDotIndex);
+                // 截取路径，如 "name"
+                path = vName.substring(firstDotIndex + 1);
+                // 更新vName为根变量名，以便获取根Value对象
+                vName = rootName;
+            }
+
+            Value refValue = NodeReflectUtils.getValue(nodeMeta, vName, valueSource.getVGroup());
             if (ObjectUtil.isEmpty(refValue)) {
                 return;
             }
 
-            value.setContent(refValue.getContent());
-            value.setSource(refValue.getSource());
+            if (StrUtil.isNotEmpty(path)) {
+                // 如果存在路径，则从根Value的内容中递归获取子属性值
+                Object content = refValue.getContent();
+                Object childValue = getValueByPath(content, path);
+                value.setContent(childValue);
+            } else {
+                value.setContent(refValue.getContent());
+                value.setSource(refValue.getSource());
+            }
         }
     }
 
@@ -200,7 +226,7 @@ public class ValueUtils {
     }
 
     /**
-     * 处理变量集
+     * 处理变量集,变量格式格式{{xxx}}，支持{{xxx.a.b.c}}格式
      * @param nodeMeta    节点元数据
      * @param flowContext 流程上下文
      */
@@ -259,7 +285,6 @@ public class ValueUtils {
     }
     /**
      * 处理变量
-     *
      * @param field
      * @param values
      * @param flowContext
@@ -328,6 +353,42 @@ public class ValueUtils {
      * @return 返回变量的值
      */
     private static Object getVariableValue(String variable, Map<String, Value> inputs, FlowContext flowContext) {
+        if(ObjectUtil.isEmpty(variable)){
+            return "";
+        }
+        variable=variable.trim();
+        // 1. 尝试直接获取变量值
+        Object variableValue = getDirectVariableValue(variable, inputs, flowContext);
+        if(ObjectUtil.isNotEmpty(variableValue)){
+            return variableValue;
+        }
+        if(variable.endsWith(".")){
+            variable=variable.substring(0,variable.length()-1);
+        }
+        if(!variable.contains(".")){
+            return "";
+        }
+        // 2. 如果直接获取不到，且变量名包含点号，尝试解析嵌套属性
+        int firstDotIndex = variable.indexOf(".");
+        String rootVariable = variable.substring(0, firstDotIndex);
+        String path = variable.substring(firstDotIndex + 1);
+
+        Object rootValue = getDirectVariableValue(rootVariable, inputs, flowContext);
+        if (rootValue != null) {
+            variableValue = getValueByPath(rootValue, path);
+        }
+        return variableValue;
+    }
+
+    /**
+     * 直接获取变量值（不处理嵌套属性）
+     *
+     * @param variable    变量名称
+     * @param inputs      输入参数
+     * @param flowContext 流程上下文
+     * @return 变量值
+     */
+    private static Object getDirectVariableValue(String variable, Map<String, Value> inputs, FlowContext flowContext) {
         Object variableValue = null;
 
         // 处理系统预置变量
@@ -359,15 +420,117 @@ public class ValueUtils {
                 }
             }
         }
-
         return variableValue;
     }
 
     /**
-     * 替换变量值
+     * 通过路径获取对象属性值
+     * <p>
+     * 功能说明：
+     * 根据点号分隔的路径，从根对象中逐层获取属性值。
+     * 支持多种数据结构的处理，包括Map、List、数组和普通POJO对象。
+     * </p>
      *
+     * @param root 根对象，数据源
+     * @param path 属性路径，例如 "user.address.city" 或 "items.0.name"
+     * @return 对应路径的属性值，如果路径不存在或中间值为null，则返回null
+     */
+    private static Object getValueByPath(Object root, String path) {
+        if (root == null) {
+            return null;
+        }
+        if(StrUtil.isBlank(path)){
+            return root;
+        }
+        String[] keys = path.split("\\.");
+        Object current = root;
+        for (String key : keys) {
+            if (current == null) {
+                return null;
+            }
+            current = getChildValue(current, key);
+        }
+        return current;
+    }
+
+    /**
+     * 获取对象的子属性值
+     * <p>
+     * 实现逻辑：
+     * 1. 如果是 Map 或 JSONObject，通过 key 获取值
+     * 2. 如果是 List 或 JSONArray，尝试将 key 转为索引获取值
+     * 3. 如果是 数组，尝试将 key 转为索引获取值
+     * 4. 如果是 普通对象，通过反射获取字段值
+     * </p>
+     *
+     * @param current 当前对象
+     * @param key     属性名或索引
+     * @return 子属性值
+     */
+    private static Object getChildValue(Object current, String key) {
+        // 1. Map 类型 (包括 Hutool JSONObject)
+        if (current instanceof Map) {
+            return ((Map<?, ?>) current).get(key);
+        }
+        // 2. List 类型 (包括 Hutool JSONArray)
+        if (current instanceof List) {
+            return getListElement((List<?>) current, key);
+        }
+        // 3. 数组 类型
+        if (current.getClass().isArray()) {
+            return getArrayElement(current, key);
+        }
+        // 4. 普通对象 (使用反射)
+        try {
+            return ReflectUtil.getFieldValue(current, key);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取 List 元素
+     *
+     * @param list 列表
+     * @param key  索引
+     * @return 元素值
+     */
+    private static Object getListElement(List<?> list, String key) {
+        try {
+            int index = Integer.parseInt(key);
+            if (index >= 0 && index < list.size()) {
+                return list.get(index);
+            }
+        } catch (NumberFormatException e) {
+            // ignore
+        }
+        return null;
+    }
+
+    /**
+     * 获取数组元素
+     *
+     * @param array 数组对象
+     * @param key   索引
+     * @return 元素值
+     */
+    private static Object getArrayElement(Object array, String key) {
+        try {
+            int index = Integer.parseInt(key);
+            int length = Array.getLength(array);
+            if (index >= 0 && index < length) {
+                return Array.get(array, index);
+            }
+        } catch (NumberFormatException e) {
+            // ignore
+        }
+        return null;
+    }
+
+    /**
+     * 替换变量值
      * @param value         值对象
-     * @param variableName  变量名称
+     * @param variableName  变量名称，
      * @param content       替换内容
      */
     private static void replaceVariableValue(Value value, String variableName, Object content) {
@@ -392,13 +555,13 @@ public class ValueUtils {
      */
     private static String replaceVariableValue(String orgContent, String variableName, Object content) {
         String resultContent=orgContent;
-            String variableSymbol = formatVariableSymbol(variableName);
-            if (orgContent.equalsIgnoreCase(variableSymbol)) {
-                resultContent=content.toString();
-            } else {
-                String valueStr = content == null ? "" : content.toString();
-                resultContent=orgContent.replace(variableSymbol, valueStr);
-            }
+        String variableSymbol = formatVariableSymbol(variableName);
+        if (orgContent.equalsIgnoreCase(variableSymbol)) {
+            resultContent=content.toString();
+        } else {
+            String valueStr = content == null ? "" : content.toString();
+            resultContent=orgContent.replace(variableSymbol, valueStr);
+        }
         return resultContent;
     }
 
@@ -428,15 +591,15 @@ public class ValueUtils {
         Map<String,Value> valueMap=toMap(nodeMeta.getInputs());
         List<Field> fields=NodeReflectUtils.getExpandInputsFields(nodeMeta);
         for(Field field:fields){
-             String name=field.getName();
-             Value value=valueMap.get(name);
-             if(ObjectUtil.isNotEmpty(value)){
-                 try {
-                     field.set(nodeMeta,value.getContent());
-                 } catch (IllegalAccessException e) {
-                     throw new RuntimeException(e);
-                 }
-             }
+            String name=field.getName();
+            Value value=valueMap.get(name);
+            if(ObjectUtil.isNotEmpty(value)){
+                try {
+                    field.set(nodeMeta,value.getContent());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
@@ -465,4 +628,64 @@ public class ValueUtils {
         nodeMeta.setOutputs(outputValueMap.values().stream().toList());
     }
 
+
+    /**
+     * 将节点执行的结果映射到输出结果中。
+     * <p>
+     * 功能说明：根据 outputs 中定义的属性名（如 name、age、country），从 result 中取同名字段的值并写入对应 Value。
+     * 适用于大模型以 JSON 格式输出时，将 JSON 属性与界面定义的输出属性一一对应。
+     * </p>
+     *
+     * @param result  节点执行结果，支持 JSONObject 或 String 类型。为 String 时仅当可解析为 JSON 对象时才进行映射
+     * @param outputs 输出定义列表，每个 Value 的 name 对应 JSON 中的属性名
+     */
+    public static void result2Outputs(Object result, List<Value> outputs) {
+        if (ObjectUtil.isEmpty(outputs)) {
+            return;
+        }
+        JSONObject jsonObject = toJSONObject(result);
+        if (jsonObject == null) {
+            return;
+        }
+        Map<String, Value> outputsMap = new HashMap<>();
+        outputs.forEach(item -> outputsMap.put(item.getName(), item));
+
+        outputsMap.forEach((key, outputValue) -> {
+            Object value = jsonObject.get(key);
+            if (outputValue != null) {
+                outputValue.setContent(value);
+            }
+        });
+    }
+
+    /**
+     * 将结果对象转换为 JSONObject。
+     * <p>
+     * 转换规则：
+     * 1. 如果 result 已经是 JSONObject，直接返回
+     * 2. 如果 result 是 String，尝试解析为 JSON 对象；非 JSON 或解析失败返回 null
+     * 3. 其他类型返回 null
+     * </p>
+     *
+     * @param result 待转换的结果对象
+     * @return JSONObject 对象，无法转换时返回 null
+     */
+    private static JSONObject toJSONObject(Object result) {
+        if (result instanceof JSONObject) {
+            return (JSONObject) result;
+        }
+        if (result instanceof String strValue) {
+            if (StrUtil.isBlank(strValue) || !JSONUtil.isTypeJSON(strValue)) {
+                return null;
+            }
+            try {
+                return JSONUtil.parseObj(strValue);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
 }
+

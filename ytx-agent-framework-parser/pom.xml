@@ -15,6 +15,12 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <langchain4j-easy-rag.version>0.35.0</langchain4j-easy-rag.version>
+        <aspose.email.version>19.12</aspose.email.version>
+        <aspose.cells.version>21.8</aspose.cells.version>
+        <aspose.words.version>21.6</aspose.words.version>
+        <aspose.barcode.version>24.9</aspose.barcode.version>
+        <aspose.pdf.version>24.9</aspose.pdf.version>
     </properties>
     <dependencies>
         <dependency>
@@ -32,6 +38,182 @@
             <artifactId>ytx-agent-framework-base</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.ytx.ai</groupId>
+            <artifactId>ytx-agent-framework-llm</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-easy-rag</artifactId>
+            <version>${langchain4j-easy-rag.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-all</artifactId>
+            <version>1.17</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-email</artifactId>
+            <version>${aspose.email.version}</version>
+            <classifier>jdk16</classifier>
+        </dependency>
+        <!-- aspose-cells 使用本地 JAR（置于 src/main/resources/lib/aspose-cells-21.8-t.jar），
+             构建时通过 maven-install-plugin 安装到本地仓库，供本模块及引用 parser 的其他项目传递依赖 -->
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-cells</artifactId>
+            <version>${aspose.cells.version}</version>
+            <classifier>t</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-words</artifactId>
+            <version>${aspose.words.version}</version>
+            <classifier>jdk17</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-barcode</artifactId>
+            <version>${aspose.barcode.version}</version>
+            <classifier>jdk18</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-pdf</artifactId>
+            <version>${aspose.pdf.version}</version>
+            <classifier>jdk17</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.20</version>
+        </dependency>
+        <dependency><!--aspose的jar破解工具-->
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.20.0-GA</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-jpeg2000</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jai-imageio</groupId>
+            <artifactId>jai-imageio-core</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.sejda.imageio/webp-imageio -->
+        <dependency>
+            <groupId>org.sejda.imageio</groupId>
+            <artifactId>webp-imageio</artifactId>
+            <version>0.1.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.bytedeco/opencv -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>opencv</artifactId>
+            <version>4.11.0-1.5.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- 将 resources/lib 下的 aspose-cells JAR 安装到本地 Maven 仓库，
+                 使本模块及依赖 ytx-agent-framework-parser 的其他项目能解析该依赖。
+                 其他项目引用本 framework 时：若先构建本框架则本地已有该依赖；
+                 若部署到私有仓库，需将 aspose-cells-21.8-t.jar 一并 deploy 到同一仓库。 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>install-aspose-cells-local</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>${project.basedir}/src/main/resources/lib/aspose-cells-21.8-t.jar</file>
+                            <groupId>com.aspose</groupId>
+                            <artifactId>aspose-cells</artifactId>
+                            <version>${aspose.cells.version}</version>
+                            <classifier>t</classifier>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <!-- xml放在java目录下-->
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.png</include>
+                    <include>**/*.dll</include>
+                    <include>**/*.so</include>
+                </includes>
+            </resource>
+            <!--指定资源的位置（xml放在resources下，可以不用指定）；
+                排除 lib 下的 jar，避免打包进产物，该 jar 仅通过 install-file 安装为 Maven 依赖 -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>lib/*.jar</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/test/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.png</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/test/resources</directory>
+            </resource>
+        </resources>
+    </build>
+
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo1.maven.org/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>aspose-maven-repository</id>
+            <name>AsposeJavaAPI</name>
+            <url>https://releases.aspose.com/java/repo/</url>
+        </repository>
+        <repository>
+            <id>ali maven</id>
+            <url>https://maven.aliyun.com/repository/central</url>
+        </repository>
+    </repositories>
 </project>

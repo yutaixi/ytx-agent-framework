@@ -1,6 +1,7 @@
 package com.ytx.ai.workflow.execute;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.ytx.ai.agent.llm.callback.StreamCallback;
 import com.ytx.ai.base.agent.AgentMemory;
 import com.ytx.ai.base.agent.ChatDTO;
 import com.ytx.ai.base.agent.Command;
@@ -27,6 +28,7 @@ public class FlowContext {
     private Map<String, Skill> skillMap =new HashMap<>();
 
     private final List<Command> commands = new CopyOnWriteArrayList<>();
+    private StreamCallback streamCallback;
 
 
     public static FlowContext of(FlowContext context) {

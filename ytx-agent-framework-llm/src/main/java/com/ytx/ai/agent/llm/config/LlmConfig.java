@@ -1,28 +1,23 @@
 package com.ytx.ai.agent.llm.config;
 
-import com.plexpt.chatgpt.ChatGPT;
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.ytx.ai.agent.llm.service.LlmService;
 import com.ytx.ai.agent.llm.service.impl.ChatGptService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 
 @Configuration
 public class LlmConfig {
 
-    @Autowired
-    private LlmConfigProperty llmConfigProperty;
-
     @Bean
-    public ChatGPT chatGPT()
+    public OpenAIClient openAIClient(LlmConfigProperty llmConfigProperty)
     {
-        return ChatGPT.builder()
+        return OpenAIOkHttpClient.builder()
                 .apiKey(llmConfigProperty.getApiKey())
-                .timeout(llmConfigProperty.getTimeout())
-                .apiHost(llmConfigProperty.getApiHost())
-                .build()
-                .init();
+                .baseUrl(llmConfigProperty.getApiHost())
+                .timeout(llmConfigProperty.getReadTimeout())
+                .build();
     }
 
     @Bean

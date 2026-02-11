@@ -25,4 +25,3 @@ public class SkillToolEntity {
     private Date updateTime;
     private Boolean disabled;
 }
-分析代码有哪些可以优化的点

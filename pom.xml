@@ -21,6 +21,7 @@
         <module>ytx-agent-framework-repository/ytx-agent-framework-repository-pg</module>
         <module>ytx-agent-framework-repository/ytx-agent-framework-repository-base</module>
         <module>ytx-agent-framework-parser</module>
+        <module>ytx-agent-framework-oss</module>
     </modules>
 
     <properties>

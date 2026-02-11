@@ -64,6 +64,11 @@ public class WorkflowConfig {
     }
 
     @Bean
+    public PluginNode pluginNode() {
+        return new PluginNode();
+    }
+
+    @Bean
     public FlowStart flowStart() {
         return new FlowStart();
     }

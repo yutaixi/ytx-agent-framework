@@ -18,5 +18,5 @@ public class PluginStoreEntity {
     private String about;
     private String scenarios;
     private String category;
+    private Boolean official;
 }
-分析代码有哪些可以优化的点

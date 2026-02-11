@@ -11,6 +11,7 @@ public enum WorkflowPluginTypeIdEnum {
     SUBPROCESS( "subProcess",  "子流程"),
     BATCH( "batch",  "批量处理"),
     BATCH_BODY( "batchBody",  "批量处理体"),
+    PLUGIN( "plugin",  "插件节点，自定义插件或者插件市场的插件"),
 
 
     AGENT_START("agentStart",  "启动智能体"),

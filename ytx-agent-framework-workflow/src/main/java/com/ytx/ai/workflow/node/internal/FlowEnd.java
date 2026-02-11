@@ -40,6 +40,15 @@ public class FlowEnd extends BasicNode {
         if(ObjectUtil.isNotEmpty(outputText)){
             output.setAnswer(outputText);
         }
+
+        // 如果启用了流式输出，则在结束节点处回调最终回答，通知上层“流式结束”。
+        // 注意：实际的增量内容由紧邻的 LLM 节点负责推送，这里只负责发出最终完成信号。
+//        if (flowContext.isStreamingEnabled()) {
+//            StreamCallback callback = flowContext.getStreamCallback();
+//            if (callback != null && ObjectUtil.isNotEmpty(outputText)) {
+//                callback.onAnswerCompleted(outputText);
+//            }
+//        }
         return output;
     }
 
@@ -59,5 +68,7 @@ public class FlowEnd extends BasicNode {
         private List<Value> outputs;
         @DependsVariable
         private String outputText;
+
+        private boolean streamOutput;
     }
 }

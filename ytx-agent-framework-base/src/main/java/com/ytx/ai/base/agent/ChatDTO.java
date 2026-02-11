@@ -1,6 +1,6 @@
 package com.ytx.ai.base.agent;
 
-import com.plexpt.chatgpt.entity.chat.Message;
+import com.ytx.ai.agent.llm.vo.Message;
 import lombok.Getter;
 import lombok.Setter;
 
