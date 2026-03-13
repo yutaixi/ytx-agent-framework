@@ -49,5 +49,5 @@ public class OssProperties {
     /**
      * 基础路径 (Local模式使用)
      */
-    private String basePath;
+    private String basePath="/data/oss";
 }

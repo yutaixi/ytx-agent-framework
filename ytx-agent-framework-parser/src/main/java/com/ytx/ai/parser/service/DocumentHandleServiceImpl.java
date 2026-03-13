@@ -29,7 +29,19 @@ public class DocumentHandleServiceImpl implements DocumentHandleService {
     @Autowired
     private DocumentParserProperties documentParserProperties;
 
-    @Autowired
+    /**
+     * OCR 代理对象。
+     * <p>
+     * 该依赖为「可选依赖」，业务侧如果未提供任何 {@link OcrAgent} 的实现，
+     * Spring 容器不会注入该 Bean，当前类在运行时也不会因此报错。
+     * 仅当：
+     * <ul>
+     *     <li>业务侧设置了解析选项 {@link DocumentParseOption#isOcrIfContentEmpty()} 为 true，并且</li>
+     *     <li>文档内容为空但存在合并后的图片内容</li>
+     * </ul>
+     * 时，且容器中存在可用的 {@link OcrAgent} 实现，才会触发 OCR 解析流程。
+     */
+    @Autowired(required = false)
     private OcrAgent ocrAgent;
 
     /**
@@ -54,7 +66,9 @@ public class DocumentHandleServiceImpl implements DocumentHandleService {
         stopWatch.stop();
         log.info("文档解析，耗时{}ms",stopWatch.getLastTaskTimeMillis());
 
-        if (parseOption.isOcrIfContentEmpty()) {
+        // 当业务侧开启「内容为空则尝试 OCR」开关，且当前容器中存在可用的 OCR 实现时，才触发 OCR 逻辑。
+        // 如果未开启开关或容器未提供 OCR 实现，则直接返回文档解析结果，不做额外处理。
+        if (parseOption.isOcrIfContentEmpty() && ocrAgent != null) {
             String content = document.getText();
             if (ObjectUtil.isEmpty(content) && ObjectUtil.isNotEmpty(document.getMergedImage())) {
                 stopWatch.start();
