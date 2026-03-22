@@ -10,7 +10,10 @@ import com.ytx.ai.parser.PlainTextParser;
 import com.ytx.ai.parser.WordDocParser;
 import com.ytx.ai.parser.service.DocumentHandleService;
 import com.ytx.ai.parser.service.DocumentHandleServiceImpl;
+import com.ytx.ai.parser.util.NativeLoader;
+import com.ytx.ai.parser.util.ParserUtils;
 import dev.langchain4j.data.document.parser.TextDocumentParser;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -113,5 +116,14 @@ public class DocumentParserConfig {
     @Bean
     public TextDocumentParser textDocumentParser() {
         return new TextDocumentParser();
+    }
+
+    @Bean
+    public ApplicationRunner applicationStartupRunner(){
+        return args -> {
+            ParserUtils.removeWaterMark();
+            ParserUtils.setCellsLicense();
+            NativeLoader.loadNativeLibrary();
+        };
     }
 }
