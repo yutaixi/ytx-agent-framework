@@ -1,5 +1,6 @@
 package com.ytx.ai.agent.config;
 
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import com.ytx.ai.base.constants.RepositoryType;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -34,11 +35,21 @@ public class AgentMysqlDataSourceConfig {
                 .build();
     }
 
+    /**
+     * 构建 MySQL 版 SqlSessionFactory，并注入 MyBatis-Plus 租户插件
+     * @param dataSource MySQL 数据源
+     * @param mybatisPlusInterceptor 包含租户过滤插件的 MyBatis-Plus 拦截器
+     * @return SqlSessionFactory 实例
+     */
     @Primary
     @Bean(name = "agentSqlSessionFactory")
-    public SqlSessionFactory agentSqlSessionFactory(@Qualifier("agentDataSource") DataSource dataSource) throws Exception {
+    public SqlSessionFactory agentSqlSessionFactory(
+            @Qualifier("agentDataSource") DataSource dataSource,
+            MybatisPlusInterceptor mybatisPlusInterceptor) throws Exception {
         MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
         factoryBean.setDataSource(dataSource);
+        // 注入租户拦截插件，使所有 SQL 自动带上 tenant_code 过滤
+        factoryBean.setPlugins(mybatisPlusInterceptor);
         return factoryBean.getObject();
     }
 

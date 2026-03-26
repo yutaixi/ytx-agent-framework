@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LlmNode extends BasicNode {
 
@@ -95,23 +96,78 @@ public class LlmNode extends BasicNode {
         boolean enableStreaming = nodeMeta.isStreaming();
         String content;
         if (enableStreaming) {
-            // 流式调用大模型，在回调中将增量结果透传到 StreamCallback、
-            StreamCallback sseStreamListener=flowContext.getStreamCallback();
-            llmService.chatCompletionStream(llmChatCompletion,sseStreamListener );
-            content="";
+            content = chatCompletionStreamWithCapture(llmChatCompletion, flowContext);
         } else {
-            // 保持原有非流式调用逻辑，兼容历史行为
+            // 非流式调用，保持原有逻辑
             content = llmService.chatCompletion(llmChatCompletion);
         }
-        // 将最终完整内容写入输出变量，保持与历史行为一致
-        if (isJsonResponse){
+        // 将完整内容写入输出变量（流式与非流式统一处理，保证下游节点可正确引用 LLM 输出）
+        if (isJsonResponse) {
             ValueUtils.result2Outputs(content, nodeMeta.getOutputs());
-        }else{
-            nodeMeta.getOutputs().forEach(item->{
-                item.setContent(content);
-            });
+        } else {
+            nodeMeta.getOutputs().forEach(item -> item.setContent(content));
         }
         return NodeOutput.of();
+    }
+
+    /**
+     * 流式调用大模型，并捕获完整回复文本。
+     * <p>
+     * 设计说明：
+     * <ul>
+     *   <li>{@link LlmService#chatCompletionStream} 是同步阻塞调用，返回时流已全部接收完毕。</li>
+     *   <li>完整文本在内部通过 {@link StreamCallback#onCompleted(String)} 回调传出，
+     *       但调用方若只持有外部回调（如 SSE emitter）则无法拿到该文本。</li>
+     *   <li>此方法构建一个透明包装回调：将所有事件原样转发给外部回调（保持 SSE 推送不变），
+     *       同时用 {@link AtomicReference} 在 {@code onCompleted} 中捕获完整文本。</li>
+     *   <li>流结束后返回该完整文本，供下游节点（Condition/Code/HTTP/FlowEnd 等）正确引用。</li>
+     * </ul>
+     *
+     * @param llmChatCompletion 大模型对话请求参数
+     * @param flowContext       工作流上下文，持有可选的外部流式回调（SSE emitter 等）
+     * @return 大模型本次完整回复文本，若流式过程发生异常则返回空字符串
+     */
+    private String chatCompletionStreamWithCapture(LlmChatCompletion llmChatCompletion, FlowContext flowContext) {
+        StreamCallback outerCallback = flowContext.getStreamCallback();
+        // AtomicReference 存储 onCompleted 捕获到的完整文本
+        AtomicReference<String> capturedTextRef = new AtomicReference<>("");
+
+        // 透明包装回调：事件全部转发给外部回调，同时捕获 onCompleted 中的完整文本
+        StreamCallback capturingCallback = new StreamCallback() {
+            @Override
+            public void onDelta(String deltaText) {
+                if (outerCallback != null) {
+                    outerCallback.onDelta(deltaText);
+                }
+            }
+
+            @Override
+            public void onCompleted(String fullText) {
+                // 捕获完整文本，供 LlmNode 写入输出变量
+                capturedTextRef.set(fullText != null ? fullText : "");
+                if (outerCallback != null) {
+                    outerCallback.onCompleted(fullText);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                if (outerCallback != null) {
+                    outerCallback.onError(throwable);
+                }
+            }
+
+            @Override
+            public void onWorkflowCompleted(String answer) {
+                if (outerCallback != null) {
+                    outerCallback.onWorkflowCompleted(answer);
+                }
+            }
+        };
+
+        // chatCompletionStream 为同步阻塞调用，返回时 onCompleted 已被触发，capturedTextRef 已被赋值
+        llmService.chatCompletionStream(llmChatCompletion, capturingCallback);
+        return capturedTextRef.get();
     }
 
     @Override

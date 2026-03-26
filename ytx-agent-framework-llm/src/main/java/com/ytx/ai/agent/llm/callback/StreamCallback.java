@@ -39,4 +39,20 @@ public interface StreamCallback {
      */
     void onError(Throwable throwable);
 
+    /**
+     * 工作流流式输出完成时的回调，由 FlowEnd 节点（streamOutput=true）触发。
+     * <p>
+     * 与 {@link #onCompleted(String)} 的区别：
+     * <ul>
+     *     <li>{@code onCompleted} 表示单次 LLM 流式输出结束（由 LLM 节点内部触发）。</li>
+     *     <li>{@code onWorkflowCompleted} 表示整个工作流结束节点执行完成（由 FlowEnd 节点触发）。</li>
+     * </ul>
+     * 默认实现为空操作，子类可覆盖以实现 SSE 完成信号等功能。
+     *
+     * @param answer 工作流最终输出的回答文本（流式模式下可能为空字符串）
+     */
+    default void onWorkflowCompleted(String answer) {
+        // 默认空实现，子类按需覆盖
+    }
+
 }

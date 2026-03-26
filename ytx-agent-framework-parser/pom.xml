@@ -33,15 +33,16 @@
             <artifactId>hutool-all</artifactId>
             <version>5.8.40</version>
         </dependency>
+        <!-- 使用父 POM 解析后的版本写入 flatten 后的 POM，避免 ${revision} 未展开导致消费方模型无效、传递依赖被丢弃 -->
         <dependency>
             <groupId>com.ytx.ai</groupId>
             <artifactId>ytx-agent-framework-base</artifactId>
-            <version>${revision}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ytx.ai</groupId>
             <artifactId>ytx-agent-framework-llm</artifactId>
-            <version>${revision}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
@@ -59,18 +60,20 @@
             <version>${aspose.email.version}</version>
             <classifier>jdk16</classifier>
         </dependency>
-        <!-- aspose-cells 使用本地 JAR（置于 src/main/resources/lib/aspose-cells-21.8-t.jar），
-             构建时通过 maven-install-plugin 安装到本地仓库，供本模块及引用 parser 的其他项目传递依赖 -->
-        <!-- aspose-cells 使用本地 JAR；
-             需要将 aspose-cells-21.8-t.jar 放在
-             ${project.basedir}/src/main/resources/lib 目录下 -->
+        <!--
+            aspose-cells 使用本地 trial JAR（路径：src/main/resources/lib/aspose-cells-21.8-t.jar）。
+            原因：scope=system 且 systemPath 含 ${project.basedir} 时，flatten 安装到本地仓库的 POM 仍为字面量路径，
+            Maven 校验认为非法，消费方（如 ytx-agent）会丢弃本模块全部传递依赖，运行时缺 langchain4j 等类。
+            做法：在 initialize 阶段将上述文件 install-file 到本地仓库，再声明为普通依赖，保证 POM 可传递、可打进 Spring Boot fat jar。
+            参数：groupId/artifactId/version/classifier 与 install-file 的 configuration 保持一致，供解析器从本地仓库拉取。
+        -->
         <dependency>
             <groupId>com.aspose</groupId>
             <artifactId>aspose-cells</artifactId>
             <version>${aspose.cells.version}</version>
             <classifier>t</classifier>
-            <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/lib/aspose-cells-21.8-t.jar</systemPath>
+            <scope>system</scope>
         </dependency>
 
         <dependency>
@@ -133,6 +136,34 @@
 
     <build>
         <plugins>
+            <!--
+                将 lib 下的 aspose-cells trial 安装到本地 Maven 仓库，配合上方普通 dependency 使用。
+                file：本地 jar 绝对/相对路径（基于模块目录，构建时解析为绝对路径）。
+                绑定 initialize：早于 compile，保证首次解析 aspose-cells 依赖前文件已在本地仓库。
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>install-aspose-cells-from-lib</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>${project.basedir}/src/main/resources/lib/aspose-cells-21.8-t.jar</file>
+                            <groupId>com.aspose</groupId>
+                            <artifactId>aspose-cells</artifactId>
+                            <version>${aspose.cells.version}</version>
+                            <packaging>jar</packaging>
+                            <classifier>t</classifier>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

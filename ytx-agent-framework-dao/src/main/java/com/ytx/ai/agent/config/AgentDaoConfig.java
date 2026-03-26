@@ -1,5 +1,6 @@
 package com.ytx.ai.agent.config;
 
+import com.ytx.ai.agent.config.tenant.TenantMetaObjectHandler;
 import com.ytx.ai.agent.service.AgentService;
 import com.ytx.ai.agent.service.PluginStoreService;
 import com.ytx.ai.agent.service.SkillService;
@@ -34,4 +35,8 @@ public class AgentDaoConfig {
         return new PluginStoreService();
     }
 
+    @Bean
+    public TenantMetaObjectHandler tenantMetaObjectHandler(){
+        return new TenantMetaObjectHandler();
+    }
 }

@@ -11,6 +11,7 @@ import com.openai.models.ResponseFormatText;
 import com.openai.core.http.StreamResponse;
 import com.openai.models.chat.completions.*;
 import com.openai.models.embeddings.*;
+import com.ytx.ai.agent.llm.config.LlmConfigProperty;
 import com.ytx.ai.agent.llm.constants.LLMConstants;
 import com.ytx.ai.agent.llm.constants.ResponseFormatType;
 import com.ytx.ai.agent.llm.service.LlmService;
@@ -30,6 +31,9 @@ public class ChatGptService implements LlmService {
 
     @Autowired
     private OpenAIClient openAIClient;
+    @Autowired
+    private LlmConfigProperty llmConfigProperty;
+
 
     /**
      * 发起聊天补全请求并返回完整响应。
@@ -165,14 +169,20 @@ public class ChatGptService implements LlmService {
      */
     private ChatCompletionCreateParams buildCreateParams(LlmChatCompletion chatRequest,
                                                          List<ChatCompletionMessageParam> messages) {
+        String requestModel = chatRequest.getModel();
+        if (ObjectUtil.isEmpty(requestModel)) {
+            // 业务未显式传 model 时，回退到配置中心/本地配置的默认模型，避免真实调用时 NPE。
+            requestModel = llmConfigProperty.getDefaultModel();
+        }
         return ChatCompletionCreateParams.builder()
                 .messages(messages)
-                .model(chatRequest.getModel())
+                .model(requestModel)
                 .temperature(chatRequest.getTemperature())
                 .responseFormat(buildResponseFormat(chatRequest))
                 .reasoningEffort(buildReasoningEffort(chatRequest))
                 .build();
     }
+
 
     /**
      * 将 system/assistant/function 消息的 content 转为字符串。
